@@ -1,0 +1,29 @@
+# Virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# OS metadata
+.DS_Store
+__MACOSX/
+
+# Raw massive datasets exceeding GitHub limits (download instructions in README)
+ass1/fer2013.csv
+ass1/fer2013.csv.zip
+ass2/MHEALTHDATASET_MISSING/
+ass1/tmp/
+
+# LaTeX compilation intermediates
+*.aux
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.synctex.gz
+*.blg
+
+# Scratch scripts
+ass2/fix_tex.py
+ass2/optimize_report.py
+ass2/ass2
+practicals/

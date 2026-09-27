@@ -1,0 +1,137 @@
+{
+  "metrics": [
+    {
+      "model": "Chest Accel",
+      "accuracy": 0.885,
+      "macro_precision": 0.9298,
+      "macro_recall": 0.8945,
+      "macro_f1": 0.8848,
+      "weighted_f1": 0.8746,
+      "parameters": 16332,
+      "latency_ms": 0.031,
+      "selected_epoch": 8
+    },
+    {
+      "model": "Ankle Accel",
+      "accuracy": 0.8589,
+      "macro_precision": 0.8913,
+      "macro_recall": 0.8649,
+      "macro_f1": 0.8641,
+      "weighted_f1": 0.8588,
+      "parameters": 16332,
+      "latency_ms": 0.03,
+      "selected_epoch": 19
+    },
+    {
+      "model": "Wrist Gyro",
+      "accuracy": 0.856,
+      "macro_precision": 0.8836,
+      "macro_recall": 0.8259,
+      "macro_f1": 0.8253,
+      "weighted_f1": 0.8456,
+      "parameters": 16332,
+      "latency_ms": 0.031,
+      "selected_epoch": 11
+    },
+    {
+      "model": "Early Fusion",
+      "accuracy": 0.9527,
+      "macro_precision": 0.9695,
+      "macro_recall": 0.9565,
+      "macro_f1": 0.9537,
+      "weighted_f1": 0.9497,
+      "parameters": 76172,
+      "latency_ms": 0.031,
+      "selected_epoch": 18
+    },
+    {
+      "model": "Late Fusion",
+      "accuracy": 0.9556,
+      "macro_precision": 0.9721,
+      "macro_recall": 0.9592,
+      "macro_f1": 0.9568,
+      "weighted_f1": 0.9529,
+      "parameters": 48996,
+      "latency_ms": 0.097,
+      "selected_epoch": "-"
+    }
+  ],
+  "per_class_f1": {
+    "Chest Accel": {
+      "Class_1": 0.749003984063745,
+      "Class_2": 0.496,
+      "Class_3": 1.0,
+      "Class_4": 0.676056338028169,
+      "Class_5": 0.782608695652174,
+      "Class_6": 1.0,
+      "Class_7": 1.0,
+      "Class_8": 0.9777777777777777,
+      "Class_9": 1.0,
+      "Class_10": 0.967032967032967,
+      "Class_11": 0.9690721649484536,
+      "Class_12": 1.0
+    },
+    "Ankle Accel": {
+      "Class_1": 0.6586345381526104,
+      "Class_2": 0.6438356164383562,
+      "Class_3": 1.0,
+      "Class_4": 1.0,
+      "Class_5": 0.9508196721311475,
+      "Class_6": 0.774869109947644,
+      "Class_7": 0.7388535031847133,
+      "Class_8": 0.7132867132867133,
+      "Class_9": 0.9312169312169312,
+      "Class_10": 0.9782608695652174,
+      "Class_11": 0.9791666666666666,
+      "Class_12": 1.0
+    },
+    "Wrist Gyro": {
+      "Class_1": 0.8803827751196173,
+      "Class_2": 0.6944444444444444,
+      "Class_3": 0.8103448275862069,
+      "Class_4": 0.8220858895705522,
+      "Class_5": 0.9625668449197861,
+      "Class_6": 0.5217391304347826,
+      "Class_7": 1.0,
+      "Class_8": 0.7456140350877193,
+      "Class_9": 0.9261083743842364,
+      "Class_10": 0.9946524064171123,
+      "Class_11": 1.0,
+      "Class_12": 0.5454545454545454
+    },
+    "Early Fusion": {
+      "Class_1": 0.8,
+      "Class_2": 0.6619718309859155,
+      "Class_3": 0.9946524064171123,
+      "Class_4": 1.0,
+      "Class_5": 1.0,
+      "Class_6": 0.9937888198757764,
+      "Class_7": 1.0,
+      "Class_8": 0.9942857142857143,
+      "Class_9": 1.0,
+      "Class_10": 1.0,
+      "Class_11": 1.0,
+      "Class_12": 1.0
+    },
+    "Late Fusion": {
+      "Class_1": 0.8068669527896996,
+      "Class_2": 0.6853146853146853,
+      "Class_3": 1.0,
+      "Class_4": 1.0,
+      "Class_5": 1.0,
+      "Class_6": 1.0,
+      "Class_7": 1.0,
+      "Class_8": 1.0,
+      "Class_9": 1.0,
+      "Class_10": 0.9946524064171123,
+      "Class_11": 0.9947089947089947,
+      "Class_12": 1.0
+    }
+  },
+  "best_epochs": {
+    "Chest Accel": 8,
+    "Ankle Accel": 19,
+    "Wrist Gyro": 11,
+    "Early Fusion": 18
+  }
+}
