@@ -30,7 +30,7 @@
       "macro_f1": 0.8253,
       "weighted_f1": 0.8456,
       "parameters": 16332,
-      "latency_ms": 0.031,
+      "latency_ms": 0.03,
       "selected_epoch": 11
     },
     {
@@ -52,7 +52,7 @@
       "macro_f1": 0.9568,
       "weighted_f1": 0.9529,
       "parameters": 48996,
-      "latency_ms": 0.097,
+      "latency_ms": 0.096,
       "selected_epoch": "-"
     }
   ],

@@ -240,16 +240,21 @@ def plot_task1_figures(raw_dfs):
     sample_df = all_sub[corr_cols].dropna().sample(n=50000, random_state=SEED)
     corr_mat = sample_df.corr()
     
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(10, 8.5))
     mask = np.triu(np.ones_like(corr_mat, dtype=bool))
     sns.heatmap(
         corr_mat, mask=mask, cmap="vlag", vmin=-1.0, vmax=1.0, center=0,
         xticklabels=corr_labels, yticklabels=corr_labels,
-        annot=True, fmt=".2f", annot_kws={"size": 7},
-        cbar_kws={"shrink": 0.8, "label": "Pearson Correlation Coefficient"},
+        annot=True, fmt=".2f", annot_kws={"size": 7.5},
+        cbar_kws={"shrink": 0.82},
         ax=ax
     )
-    ax.set_title("Cross-Sensor & Cross-Modality Correlation Matrix (MHEALTH)", fontsize=12, fontweight='bold', pad=12)
+    ax.tick_params(axis='x', rotation=45, labelsize=10.5)
+    ax.tick_params(axis='y', rotation=0, labelsize=10.5)
+    cbar = ax.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=10)
+    cbar.set_label("Pearson Correlation Coefficient", fontsize=11, fontweight='bold')
+    ax.set_title("Cross-Sensor & Cross-Modality Correlation Matrix (MHEALTH)", fontsize=13, fontweight='bold', pad=12)
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, "fig3_sensor_correlation_heatmap.pdf"), bbox_inches="tight")
     plt.savefig(os.path.join(FIG_DIR, "fig3_sensor_correlation_heatmap.png"), dpi=300, bbox_inches="tight")
@@ -848,7 +853,9 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     # -------------------------------------------------------------
     # Figure 5: Training Diagnostics & Loss / Macro-F1 Curves
     # -------------------------------------------------------------
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    # Figure 5: Training Diagnostics (Loss and F1 Evolution)
+    # -------------------------------------------------------------
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.8))
     palette = {
         "Chest Accel": "#1f77b4",
         "Ankle Accel": "#ff7f0e",
@@ -861,24 +868,26 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     for name, hist in histories.items():
         color = palette[name]
         # Loss curves: dashed for train, solid for val
-        ax1.plot(epochs_range, hist["val_loss"], color=color, lw=1.8, label=f"{name} (Val)")
-        ax1.plot(epochs_range, hist["train_loss"], color=color, lw=1.0, linestyle="--", alpha=0.5)
+        ax1.plot(epochs_range, hist["val_loss"], color=color, lw=2.2, label=f"{name} (Val)")
+        ax1.plot(epochs_range, hist["train_loss"], color=color, lw=1.3, linestyle="--", alpha=0.55)
         
         # F1 curves
-        ax2.plot(epochs_range, hist["val_macro_f1"], color=color, lw=1.8, label=f"{name} (Val)")
-        ax2.plot(epochs_range, hist["train_macro_f1"], color=color, lw=1.0, linestyle="--", alpha=0.5)
+        ax2.plot(epochs_range, hist["val_macro_f1"], color=color, lw=2.2, label=f"{name} (Val)")
+        ax2.plot(epochs_range, hist["train_macro_f1"], color=color, lw=1.3, linestyle="--", alpha=0.55)
         
-    ax1.set_title("(a) Training (dashed) & Validation (solid) Loss", fontsize=11, fontweight='bold')
-    ax1.set_xlabel("Epoch", fontsize=10)
-    ax1.set_ylabel("Cross-Entropy Loss", fontsize=10)
+    ax1.set_title("(a) Training (dashed) & Validation (solid) Loss", fontsize=13.5, fontweight='bold', pad=8)
+    ax1.set_xlabel("Epoch", fontsize=12, fontweight='bold')
+    ax1.set_ylabel("Cross-Entropy Loss", fontsize=12, fontweight='bold')
+    ax1.tick_params(axis='both', labelsize=11)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(loc="upper right", fontsize=8.5)
+    ax1.legend(loc="upper right", fontsize=10.5, framealpha=0.9)
     
-    ax2.set_title("(b) Training (dashed) & Validation (solid) Macro-F1", fontsize=11, fontweight='bold')
-    ax2.set_xlabel("Epoch", fontsize=10)
-    ax2.set_ylabel("Macro-F1 Score", fontsize=10)
+    ax2.set_title("(b) Training (dashed) & Validation (solid) Macro-F1", fontsize=13.5, fontweight='bold', pad=8)
+    ax2.set_xlabel("Epoch", fontsize=12, fontweight='bold')
+    ax2.set_ylabel("Macro-F1 Score", fontsize=12, fontweight='bold')
+    ax2.tick_params(axis='both', labelsize=11)
     ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend(loc="lower right", fontsize=8.5)
+    ax2.legend(loc="lower right", fontsize=10.5, framealpha=0.9)
     
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, "fig5_training_loss_f1_curves.pdf"), bbox_inches="tight")
@@ -889,7 +898,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     # -------------------------------------------------------------
     # Figure 6: Normalized Confusion Matrices (Baselines vs Multimodal)
     # -------------------------------------------------------------
-    fig, axes = plt.subplots(2, 3, figsize=(16, 11))
+    fig, axes = plt.subplots(2, 3, figsize=(11.5, 7.8))
     class_short_labels = [ACTIVITY_SHORT[i] for i in range(1, 13)]
     
     model_order = ["Chest Accel", "Ankle Accel", "Wrist Gyro", "Early Fusion", "Late Fusion"]
@@ -903,18 +912,24 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         preds = np.argmax(probs, axis=1)
         cm = confusion_matrix(y_test, preds, normalize="true")
         
+        annot_matrix = np.empty_like(cm, dtype=object)
+        for r_i in range(12):
+            for c_i in range(12):
+                v = cm[r_i, c_i]
+                annot_matrix[r_i, c_i] = f"{v:.2f}" if v >= 0.01 else ""
+
         sns.heatmap(
-            cm, annot=True, fmt=".2f", cmap="Blues", cbar=False,
+            cm, annot=annot_matrix, fmt="", cmap="Blues", cbar=False,
             xticklabels=class_short_labels, yticklabels=class_short_labels,
-            annot_kws={"size": 6.5}, ax=ax
+            annot_kws={"size": 10.0, "weight": "bold"}, ax=ax
         )
         acc = accuracy_score(y_test, preds)
         f1 = f1_score(y_test, preds, average="macro", zero_division=0)
-        ax.set_title(f"{name} (Acc: {acc*100:.1f}%, Macro-F1: {f1:.3f})", fontsize=10, fontweight='bold')
-        ax.set_ylabel("True Activity", fontsize=9)
-        ax.set_xlabel("Predicted Activity", fontsize=9)
-        ax.tick_params(axis='x', rotation=45, labelsize=7.5)
-        ax.tick_params(axis='y', rotation=0, labelsize=7.5)
+        ax.set_title(f"{name} (Acc: {acc*100:.1f}%, F1: {f1:.3f})", fontsize=12.5, fontweight='bold', pad=5)
+        ax.set_ylabel("True Activity", fontsize=10.5, fontweight='bold')
+        ax.set_xlabel("Predicted Activity", fontsize=10.5, fontweight='bold')
+        ax.tick_params(axis='x', rotation=45, labelsize=9.5)
+        ax.tick_params(axis='y', rotation=0, labelsize=9.5)
         
     # Hide the 6th subplot
     axes[1, 2].axis("off")
@@ -931,7 +946,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         "  modality blind spots, achieving near-perfect\n"
         "  discrimination across all 12 activities."
     )
-    axes[1, 2].text(0.05, 0.45, summary_text, fontsize=10, va='center', ha='left',
+    axes[1, 2].text(0.05, 0.45, summary_text, fontsize=11, va='center', ha='left',
                     bbox=dict(boxstyle="round,pad=0.6", facecolor="#f0f4f8", edgecolor="#3470a3", lw=1.2))
     
     plt.tight_layout()
@@ -943,7 +958,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     # -------------------------------------------------------------
     # Figure 7: Multi-Class ROC & Precision-Recall Curves
     # -------------------------------------------------------------
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 4.6))
     
     # Binarize targets for multi-class ROC and PR
     from sklearn.preprocessing import label_binarize
@@ -972,7 +987,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         mean_tpr /= 12.0
         roc_auc = auc(all_fpr, mean_tpr)
         
-        ax1.plot(all_fpr, mean_tpr, color=colors_dict[name], lw=1.8,
+        ax1.plot(all_fpr, mean_tpr, color=colors_dict[name], lw=2.2,
                  label=f"{name} (AUC = {roc_auc:.3f})")
                  
         # Macro-average Precision-Recall
@@ -984,21 +999,23 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         mean_prec /= 12.0
         pr_auc = auc(recall_grid, mean_prec)
         
-        ax2.plot(recall_grid, mean_prec, color=colors_dict[name], lw=1.8,
+        ax2.plot(recall_grid, mean_prec, color=colors_dict[name], lw=2.2,
                  label=f"{name} (AUC-PR = {pr_auc:.3f})")
                  
     ax1.plot([0, 1], [0, 1], "k--", lw=1.0, alpha=0.5)
-    ax1.set_title("(a) Macro-Average Receiver Operating Characteristic (ROC)", fontsize=11, fontweight='bold')
-    ax1.set_xlabel("False Positive Rate", fontsize=10)
-    ax1.set_ylabel("True Positive Rate", fontsize=10)
+    ax1.set_title("(a) Macro-Average ROC Curves", fontsize=13.5, fontweight='bold', pad=8)
+    ax1.set_xlabel("False Positive Rate", fontsize=12, fontweight='bold')
+    ax1.set_ylabel("True Positive Rate", fontsize=12, fontweight='bold')
+    ax1.tick_params(axis='both', labelsize=11)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(loc="lower right", fontsize=8.5)
+    ax1.legend(loc="lower right", fontsize=10, framealpha=0.9)
     
-    ax2.set_title("(b) Macro-Average Precision-Recall (PR) Curves", fontsize=11, fontweight='bold')
-    ax2.set_xlabel("Recall", fontsize=10)
-    ax2.set_ylabel("Precision", fontsize=10)
+    ax2.set_title("(b) Macro-Average Precision-Recall Curves", fontsize=13.5, fontweight='bold', pad=8)
+    ax2.set_xlabel("Recall", fontsize=12, fontweight='bold')
+    ax2.set_ylabel("Precision", fontsize=12, fontweight='bold')
+    ax2.tick_params(axis='both', labelsize=11)
     ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend(loc="lower left", fontsize=8.5)
+    ax2.legend(loc="lower left", fontsize=10, framealpha=0.9)
     
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, "fig7_roc_pr_curves.pdf"), bbox_inches="tight")
@@ -1010,29 +1027,31 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     # Figure 8: Computational Trade-off Analysis
     # -------------------------------------------------------------
     df_metrics = pd.DataFrame(metrics_summary)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.8))
     
     # Macro F1 vs Parameter Count
     scatter_colors = [colors_dict[m] for m in df_metrics["model"]]
-    ax1.scatter(df_metrics["parameters"], df_metrics["macro_f1"], s=180, c=scatter_colors, edgecolors="black", zorder=3)
+    ax1.scatter(df_metrics["parameters"], df_metrics["macro_f1"], s=220, c=scatter_colors, edgecolors="black", linewidths=1.2, zorder=3)
     for _, row in df_metrics.iterrows():
         ax1.annotate(f"{row['model']}\n({row['parameters']:,} params)",
                      (row["parameters"], row["macro_f1"]),
-                     xytext=(10, -5), textcoords="offset points", fontsize=8.5, fontweight='bold')
-    ax1.set_title("(a) Classification Performance vs Model Parameter Complexity", fontsize=11, fontweight='bold')
-    ax1.set_xlabel("Trainable Parameters", fontsize=10)
-    ax1.set_ylabel("Test Macro-F1 Score", fontsize=10)
+                     xytext=(10, -5), textcoords="offset points", fontsize=10.5, fontweight='bold')
+    ax1.set_title("(a) Performance vs Parameter Complexity", fontsize=13.5, fontweight='bold', pad=8)
+    ax1.set_xlabel("Trainable Parameters", fontsize=12, fontweight='bold')
+    ax1.set_ylabel("Test Macro-F1 Score", fontsize=12, fontweight='bold')
+    ax1.tick_params(axis='both', labelsize=11)
     ax1.grid(True, linestyle="--", alpha=0.5)
     
     # Latency vs Macro F1
-    ax2.scatter(df_metrics["latency_ms"], df_metrics["macro_f1"], s=180, c=scatter_colors, edgecolors="black", zorder=3)
+    ax2.scatter(df_metrics["latency_ms"], df_metrics["macro_f1"], s=220, c=scatter_colors, edgecolors="black", linewidths=1.2, zorder=3)
     for _, row in df_metrics.iterrows():
         ax2.annotate(f"{row['model']}\n({row['latency_ms']:.3f} ms)",
                      (row["latency_ms"], row["macro_f1"]),
-                     xytext=(10, -5), textcoords="offset points", fontsize=8.5, fontweight='bold')
-    ax2.set_title("(b) Classification Performance vs Inference Latency (Single Window)", fontsize=11, fontweight='bold')
-    ax2.set_xlabel("Inference Latency per Window (ms)", fontsize=10)
-    ax2.set_ylabel("Test Macro-F1 Score", fontsize=10)
+                     xytext=(10, -5), textcoords="offset points", fontsize=10.5, fontweight='bold')
+    ax2.set_title("(b) Performance vs Inference Latency (Single Window)", fontsize=13.5, fontweight='bold', pad=8)
+    ax2.set_xlabel("Inference Latency per Window (ms)", fontsize=12, fontweight='bold')
+    ax2.set_ylabel("Test Macro-F1 Score", fontsize=12, fontweight='bold')
+    ax2.tick_params(axis='both', labelsize=11)
     ax2.grid(True, linestyle="--", alpha=0.5)
     
     plt.tight_layout()

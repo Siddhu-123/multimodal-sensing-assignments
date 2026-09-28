@@ -24,6 +24,8 @@
   pdfkeywords={MHEALTH, multimodal fusion, activity recognition, inertial sensors, deep learning, GDPR, AI ethics}
 }
 
+\setlength{\textfloatsep}{16pt plus 2pt minus 2pt}
+
 \graphicspath{{figures/}}
 \captionsetup{font=small,labelfont=bf,skip=3pt}
 \setlist{nosep,leftmargin=*}
@@ -297,28 +299,29 @@ All models are evaluated on this identical test split under uniform preprocessin
 
 \begin{table}[t]
 \centering
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
 \caption{Model architecture specifications and hyperparameter configurations across unimodal and multimodal implementations.}
 \label{tab:models}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcc}
+\begin{tabular}{@{}lcc@{}}
 \toprule
-\textbf{Hyperparameter / Layer} & \textbf{Unimodal Baselines} & \textbf{Early Fusion MLP} \\
+\textbf{Hyperparameter} & \textbf{Unimodal} & \textbf{Early Fusion} \\
 \midrule
-Input Dimension & $d_{\text{in}} = 53$ & $d_{\text{in}} = 159$ \\
-Hidden Layer 1 & Linear(53, 128) + BN + ReLU & Linear(159, 256) + BN + ReLU \\
+Input Dim ($d_{\text{in}}$) & 53 features & 159 features \\
+Hidden Layer 1 & Lin(53, 128) & Lin(159, 256) \\
 Dropout Rate 1 & $p = 0.30$ & $p = 0.35$ \\
-Hidden Layer 2 & Linear(128, 64) + BN + ReLU & Linear(256, 128) + BN + ReLU \\
+Hidden Layer 2 & Lin(128, 64) & Lin(256, 128) \\
 Dropout Rate 2 & $p = 0.20$ & $p = 0.25$ \\
-Output Layer & Linear(64, 12) Logits & Linear(128, 12) Logits \\
+Output Layer & Lin(64, 12) & Lin(128, 12) \\
 Total Parameters & 16,332 & 76,172 \\
-Optimiser & AdamW ($\beta_1=0.9, \beta_2=0.999$) & AdamW ($\beta_1=0.9, \beta_2=0.999$) \\
-Learning Rate Schedule & Cosine ($10^{-3} \to 10^{-5}$) & Cosine ($10^{-3} \to 10^{-5}$) \\
-Weight Decay & $1 \times 10^{-4}$ & $1 \times 10^{-4}$ \\
-Batch Size / Epochs & $64$ / 45 & $64$ / 45 \\
-Checkpoint Metric & Max Validation Macro-F1 & Max Validation Macro-F1 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Shared Hyperparameters across Configurations:}} \\
+Activation / Norm & \multicolumn{2}{c}{BatchNorm1d + ReLU} \\
+Optimiser / LR & \multicolumn{2}{c}{AdamW, Cosine ($10^{-3} \to 10^{-5}$)} \\
+Weight Decay / Batch & \multicolumn{2}{c}{$1 \times 10^{-4}$ / Batch 64 (45 Epochs)} \\
+Model Selection & \multicolumn{2}{c}{Best Validation Macro-F1} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
 \subsection{Unimodal Baselines and Fusion Strategies}
@@ -353,7 +356,7 @@ Figure~\ref{fig:training_curves} confirms stable convergence:
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.30\textheight]{fig6_confusion_matrices.pdf}
+\includegraphics[width=\textwidth]{fig6_confusion_matrices.pdf}
 \caption{Normalized test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
 \label{fig:confusion_matrices}
 \end{figure*}
@@ -368,22 +371,23 @@ Table~\ref{tab:overall_results} reports test performance across 1,035 windows fr
 
 \begin{table}[t]
 \centering
+\footnotesize
+\setlength{\tabcolsep}{2.2pt}
 \caption{Overall test set classification performance, parameter complexity, and single-window inference latency on unseen Subjects 9 and 10.}
 \label{tab:overall_results}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcccccc}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
-\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{Macro-F1} & \textbf{Params} & \textbf{Lat (ms)} \\
+\textbf{Model} & \textbf{Acc.} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Params} & \textbf{Lat(ms)} \\
 \midrule
-Chest Accel & 0.8850 & 0.9298 & 0.8945 & 0.8848 & 16,332 & 0.031 \\
-Ankle Accel & 0.8589 & 0.8913 & 0.8649 & 0.8641 & 16,332 & 0.030 \\
-Wrist Gyro  & 0.8560 & 0.8836 & 0.8259 & 0.8253 & 16,332 & 0.031 \\
-Early Fusion & 0.9527 & 0.9695 & 0.9565 & 0.9537 & 76,172 & 0.031 \\
-\textbf{Late Fusion} & \textbf{0.9556} & \textbf{0.9721} & \textbf{0.9592} & \textbf{0.9568} & 48,996 & 0.097 \\
+Chest Acc & 0.8850 & 0.9298 & 0.8945 & 0.8848 & 16,332 & 0.030 \\
+Ankle Acc & 0.8589 & 0.8913 & 0.8649 & 0.8641 & 16,332 & 0.030 \\
+Wrist Gyr & 0.8560 & 0.8836 & 0.8259 & 0.8253 & 16,332 & 0.029 \\
+Early Fus. & 0.9527 & 0.9695 & 0.9565 & 0.9537 & 76,172 & 0.030 \\
+\textbf{Late Fus.} & \textbf{0.9556} & \textbf{0.9721} & \textbf{0.9592} & \textbf{0.9568} & 48,996 & 0.094 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
+\vspace{6pt}
 
 \begin{table*}[t]
 \centering
@@ -421,7 +425,7 @@ $L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & Violent g
 \end{figure*}
 
 \subsection{Per-Class Performance and Error Analysis}
-Table~\ref{tab:per_class_f1} provides a per-class F1 breakdown across all 12 classes for all five models, resolving the omission flagged in Assignment 1.
+Table~\ref{tab:per_class_f1} provides a per-class F1 breakdown across all 12 classes for all five models.
 
 Combined with Figure~\ref{fig:confusion_matrices}, these results show how fusion resolves unimodal errors:
 \begin{enumerate}
@@ -528,12 +532,13 @@ Key technical limitations include:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 \label{sec:conclusion}
-This report demonstrated an end-to-end multimodal activity classification pipeline on the adapted MHEALTH dataset. Using segment-bounded intra-run interpolation, we resolved 615,648 missing values without cross-activity leakage. Selecting three sensor sources across acceleration and gyroscope modalities and evaluating on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, eliminating unimodal ambiguities between walking, stairs, and calisthenics. Computational profiling demonstrated an 86.2\% telemetry bandwidth reduction via local feature extraction, supported by a governance framework aligned with international privacy standards.
+This report demonstrated an end-to-end multimodal pipeline on the adapted MHEALTH dataset. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, resolving unimodal ambiguities. Computational profiling showed an 86.2\% telemetry bandwidth saving via local feature extraction, supported by a governance framework aligned with international privacy standards.
 
 \let\oldbibliography\thebibliography
 \renewcommand{\thebibliography}[1]{%
   \oldbibliography{#1}%
-  \setlength{\itemsep}{0pt}%
+  \footnotesize
+  \setlength{\itemsep}{1pt}%
   \setlength{\parskip}{0pt}%
 }
 
