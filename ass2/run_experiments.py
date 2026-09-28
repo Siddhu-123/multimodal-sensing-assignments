@@ -145,7 +145,7 @@ def plot_task1_figures(raw_dfs):
     sensor_groups = [
         ("Chest Accel ($m/s^2$)", ["chest_acc_x", "chest_acc_y", "chest_acc_z"]),
         ("Ankle Accel ($m/s^2$)", ["ankle_acc_x", "ankle_acc_y", "ankle_acc_z"]),
-        ("Wrist Gyro ($deg/s$)", ["wrist_gyr_x", "wrist_gyr_y", "wrist_gyr_z"])
+        ("Wrist Gyro (sensor units)", ["wrist_gyr_x", "wrist_gyr_y", "wrist_gyr_z"])
     ]
     
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
@@ -204,11 +204,11 @@ def plot_task1_figures(raw_dfs):
     ax1.tick_params(axis='y', labelsize=8.5)
     ax1.grid(True, linestyle='--', alpha=0.5)
     
-    # Wrist Gyroscope Angular Rate (deg/s)
+    # Wrist Gyroscope Angular Rate (sensor units)
     sns.boxplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, palette="Oranges_d", width=0.6, hue="activity_name", legend=False)
     sns.stripplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, color="darkblue", size=4, jitter=0.2)
-    ax2.set_title("(b) Wrist Angular Velocity ($deg/s$)", fontsize=11, fontweight='bold', pad=3)
-    ax2.set_ylabel("Mean Rate ($deg/s$)", fontsize=9.5, fontweight='bold')
+    ax2.set_title("(b) Wrist Angular Velocity (sensor units)", fontsize=11, fontweight='bold', pad=3)
+    ax2.set_ylabel("Mean Rate (sensor units)", fontsize=9.5, fontweight='bold')
     ax2.set_xlabel("Activity", fontsize=9.5, fontweight='bold')
     ax2.tick_params(axis='x', rotation=45, labelsize=8.5)
     ax2.tick_params(axis='y', labelsize=8.5)

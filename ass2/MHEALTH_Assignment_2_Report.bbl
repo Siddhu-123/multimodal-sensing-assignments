@@ -1,13 +1,20 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{banos2014mhealthdroid}
-Oresti Ba{\~n}os, Rafael Garc{\'\i}a, Juan Alberto~Holgado Terriza, Miguel Damas, H{\'e}ctor Pomares, Ignacio Rojas, Alejandro Saez, and Claudia Villalonga.
-\newblock {mHealthDroid}: A novel framework for agile development of mobile health applications.
-\newblock {\em International Workshop on Ambient Assisted Living and Home Care}, pages 91--98, 2014.
+Oresti Ba{\~n}os, Rafael Garc{\'\i}a, Juan Alberto~Holgado Terriza, Miguel
+  Damas, H{\'e}ctor Pomares, Ignacio Rojas, Alejandro Saez, and Claudia
+  Villalonga.
+\newblock {mHealthDroid}: A novel framework for agile development of mobile
+  health applications.
+\newblock {\em International Workshop on Ambient Assisted Living and Home
+  Care}, pages 91--98, 2014.
 
 \bibitem{banos2015sensor}
-Oresti Ba{\~n}os, Claudia Villalonga, Rafael Garcia, Alejandro Saez, Miguel Damas, Hector Pomares, Ignacio Rojas, Hanqing Shen, and Juan Alberto~Holgado Terriza.
-\newblock Design, implementation and validation of a novel open framework for agile development of mobile health applications.
+Oresti Ba{\~n}os, Claudia Villalonga, Rafael Garcia, Alejandro Saez, Miguel
+  Damas, Hector Pomares, Ignacio Rojas, Hanqing Shen, and Juan Alberto~Holgado
+  Terriza.
+\newblock Design, implementation and validation of a novel open framework for
+  agile development of mobile health applications.
 \newblock {\em BioMedical Engineering OnLine}, 14(2):S6, 2015.
 
 \bibitem{mhealth_uci_2014}
@@ -18,27 +25,56 @@ Oresti Ba{\~n}os, Rafael Garcia, and Alejandro Saez.
 
 \bibitem{bulling2014tutorial}
 Andreas Bulling, Ulf Blanke, and Bernt Schiele.
-\newblock A tutorial on human activity recognition using body-worn inertial sensors.
+\newblock A tutorial on human activity recognition using body-worn inertial
+  sensors.
 \newblock {\em ACM Computing Surveys (CSUR)}, 46(3):1--33, 2014.
+
+\bibitem{atallah2011sensor}
+Louis Atallah, Benny Lo, Rachel King, and Guang-Zhong Yang.
+\newblock Sensor placement for activity detection using wearable
+  accelerometers.
+\newblock {\em IEEE Transactions on Biomedical Circuits and Systems},
+  5(4):377--385, 2011.
 
 \bibitem{castanedo2013review}
 Federico Castanedo.
 \newblock A review of data fusion techniques.
 \newblock {\em The Scientific World Journal}, 2013:1--19, 2013.
 
-\bibitem{lara2013survey}
-Oscar~D Lara and Miguel~A Labrador.
-\newblock A survey on human activity recognition using wearable sensors.
-\newblock {\em IEEE Communications Surveys \& Tutorials}, 15(3):1192--1209, 2013.
+\bibitem{little2019statistical}
+Roderick J~A Little and Donald~B Rubin.
+\newblock {\em Statistical Analysis with Missing Data}.
+\newblock John Wiley \& Sons, 3rd edition, 2019.
+
+\bibitem{gdpr2016}
+{European Parliament and Council of the European Union}.
+\newblock {Regulation (EU) 2016/679 of the European Parliament and of the
+  Council (General Data Protection Regulation)}.
+\newblock {\em Official Journal of the European Union}, L119:1--88, 2016.
+
+\bibitem{hipaa1996}
+{US Department of Health and Human Services}.
+\newblock {Health Insurance Portability and Accountability Act of 1996
+  (HIPAA)}.
+\newblock Public Law 104-191, 1996.
+
+\bibitem{oaic_app_2021}
+{Office of the Australian Information Commissioner (OAIC)}.
+\newblock {Australian Privacy Principles Guidelines: Privacy Act 1988}.
+\newblock \url{https://www.oaic.gov.au/privacy/australian-privacy-principles},
+  2021.
 
 \bibitem{ordonez2016deep}
 Francisco~Javier Ord{\'o}{\~n}ez and Daniel Roggen.
-\newblock Deep convolutional and {LSTM} recurrent neural networks for multimodal wearable activity recognition.
+\newblock Deep convolutional and {LSTM} recurrent neural networks for
+  multimodal wearable activity recognition.
 \newblock {\em Sensors}, 16(1):115, 2016.
 
 \bibitem{radu2018multimodal}
-Valentin Radu, Nicholas~D Lane, Sourav Bhattacharya, Cecilia Mascolo, Mahesh~K Marina, and Fahim Kawsar.
+Valentin Radu, Nicholas~D Lane, Sourav Bhattacharya, Cecilia Mascolo, Mahesh~K
+  Marina, and Fahim Kawsar.
 \newblock Multimodal deep learning for activity and context recognition.
-\newblock {\em Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies}, 1(4):1--27, 2018.
+\newblock {\em Proceedings of the ACM on Interactive, Mobile, Wearable and
+  Ubiquitous Technologies}, 1(4):1--27, 2018.
 
 \end{thebibliography}

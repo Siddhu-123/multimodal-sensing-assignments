@@ -67,18 +67,18 @@ For offline review and submission verification, the entire project (reports, ins
 ### 1. Objective & Scope
 The objective is to explore, implement, and compare multimodal data fusion techniques on an adapted version of the **MHEALTH (Mobile Health)** benchmark dataset (UCI ML Repository, DOI: 10.24432/C5TW22). Sensing covers 23 channels across 3 body-worn Shimmer2 units (Chest, Left Ankle, Right Wrist) at 50 Hz.
 
-### 2. High Distinction Technical Highlights
-1. **Insightful Exploratory Data Analysis (Task 1, 20/20):**
+### 2. Technical Summary & Implementation Highlights
+1. **Insightful Exploratory Data Analysis (Task 1):**
    - Transcends flat statistics: analyzes dynamic waveforms across Static Standing ($L_1$), Periodic Walking ($L_4$), and Explosive Jumping ($L_{12}$).
-   - Identifies 4 physical kinetic energy tiers across 10 participants using Signal Magnitude Area (SMA) and Vector Magnitude, quantifying inter-subject stride variance.
-   - Computes a 17-channel cross-modality Pearson correlation matrix, proving that angular velocity and linear acceleration exhibit low cross-modal redundancy ($|r| < 0.15$), motivating sensor fusion.
-2. **Leakage-Free Missing Data Preprocessing (Task 2, 20/20):**
+   - Identifies movement intensity tiers across 10 participants using Signal Magnitude Area (SMA) and Vector Magnitude, quantifying inter-subject stride variance.
+   - Computes a 17-channel cross-modality Pearson correlation matrix, demonstrating complementary relationships between angular velocity and linear acceleration, motivating sensor fusion.
+2. **Leakage-Free Missing Data Preprocessing (Task 2):**
    - Audited 615,648 missing values (7.80% overall missing rate in sensor channels; 0 NaNs in labels).
-   - Proved that 92.4% of missing bursts consist of exactly 1 sample (20 ms) and the maximum burst is 7 samples (140 ms), establishing a Missing Completely at Random (MCAR) packet-drop mechanism.
+   - Proved that 90.4% of missing bursts consist of exactly 1 sample (20 ms) and the maximum burst is 7 samples (140 ms), establishing a Missing Completely at Random (MCAR) packet-drop mechanism.
    - Enforced **segment-bounded intra-run linear interpolation** strictly within continuous `(subject, activity)` blocks. Crucially prevents data leakage across activity and participant boundaries (residual NaNs = 0).
    - Standardisation (`StandardScaler`) fitted **strictly on the Training split** (Subjects 1–7).
    - Sliding window segmentation ($W = 128$ samples / 2.56 s, 50% overlap = 64 samples) justified by human gait cadence (1.5–2.2 steps/s) and radix-2 FFT efficiency. Extracted 53 statistical features per sensor ($53 \times 3 = 159$ multimodal features across $N=5,229$ segmented windows).
-3. **Rigorous Multimodal Modelling (Task 3, 35/35):**
+3. **Rigorous Multimodal Modelling (Task 3):**
    - Selected 3 sensor sources across 2 distinct modalities:
      - **Chest Accelerometer (Linear Acceleration, 3 axes):** Trunk posture & gravitational inclination.
      - **Left-Ankle Accelerometer (Linear Acceleration, 3 axes):** Ground impacts & ambulatory cadence.
@@ -88,7 +88,7 @@ The objective is to explore, implement, and compare multimodal data fusion techn
      - **Early Fusion (Data/Feature Concatenation):** 159-dim input vector feeding an `EarlyFusionMLP`.
      - **Late Fusion (Decision-Level Soft Voting):** Validation-weighted meta-ensemble ($\mathbf{p}_{\text{late}} = 0.358\,\mathbf{p}_{\text{chest}} + 0.395\,\mathbf{p}_{\text{ankle}} + 0.247\,\mathbf{p}_{\text{wrist}}$).
    - Achieved complete training convergence over 45 epochs with AdamW, Cosine Annealing, and validation Macro-F1 checkpointing.
-4. **Comprehensive Evaluation & Ethical Governance (Task 4, 25/25):**
+4. **Comprehensive Evaluation & Ethical Governance (Task 4):**
    - **Late Fusion achieves top performance: 95.56% Accuracy, 0.9568 Macro-F1**, providing a **+7.20% to +13.15% absolute F1 gain** over unimodal baselines.
    - Per-class breakdown across all 12 activities for all 5 models proves that fusion completely eliminates unimodal failure modes (e.g., walking F1 surges from 0.676 to 1.000; waist bends F1 surges from 0.522 to 1.000).
    - Multi-class ROC ($\text{AUC} = 1.000$) and Precision-Recall ($\text{AUC-PR} = 0.994$) curves verify superior classification margins.

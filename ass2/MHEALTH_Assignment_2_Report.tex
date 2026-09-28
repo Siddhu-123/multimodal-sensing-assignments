@@ -68,7 +68,7 @@ School of Computer Science, University of Adelaide
 \maketitle
 
 \begin{abstract}
-Wearable Human Activity Recognition (HAR) using inertial sensors is central to remote patient monitoring and mobile health. However, individual sensor locations often fail to distinguish complex activities due to anatomical blind spots and sensor noise. This report evaluates multimodal data fusion techniques on the adapted Mobile HEALTH (MHEALTH) benchmark dataset across 343,195 samples from 10 participants. An exploratory analysis reveals distinct kinetic energy tiers across 12 physical activities and low cross-modal correlation between acceleration and angular velocity. We audit 615,648 missing values (7.80\% missingness) caused by wireless packet dropouts, finding that 92.4\% of bursts span a single sample (20\,ms). To prevent cross-activity contamination, we implement segment-bounded intra-run linear interpolation. We select three sensor sources spanning two modalities: Chest Accelerometer, Left-Ankle Accelerometer, and Right-Wrist Gyroscope. Using a subject-independent evaluation (Training: Subjects 1--7; Validation: Subject 8; Testing: Subjects 9--10), we compare three unimodal baselines against two multimodal fusion strategies: Data/Feature-Level Early Fusion and Decision-Level Late Soft-Voting. Under identical training budgets and cosine annealing schedules, Late Fusion achieves 95.56\% test accuracy and 0.9568 Macro-F1, improving upon the best unimodal baseline (Chest Accel: 88.48\% F1) by +7.20\% absolute F1 and resolving ambiguities between walking, climbing stairs, and upper-limb gestures. Finally, computational profiling demonstrates that on-sensor feature extraction reduces wireless telemetry bandwidth by 86.2\%, supported by an ethical risk governance matrix aligned with GDPR, HIPAA, and Australian Privacy Principles.
+Wearable human activity recognition relies on body-worn inertial sensors to classify physical behaviours for remote health monitoring. Single-sensor placements suffer from anatomical blind spots where distinct activities produce similar local kinematic signatures. This study investigates multimodal sensor fusion across acceleration and angular velocity modalities using the adapted MHEALTH dataset (343,195 samples across 10 participants). An audit identifies 615,648 missing values (7.80\%), where 90.4\% occur as isolated single-sample gaps, consistent with a Missing Completely at Random mechanism resolved via segment-bounded interpolation. Under a subject-independent evaluation (Subjects 1--7 training, Subject 8 validation, Subjects 9--10 testing), we benchmark three unimodal multi-layer perceptrons against feature-level early fusion and decision-level late soft voting. Late fusion achieves 95.56\% test accuracy and 0.9568 Macro-F1, outperforming the strongest unimodal baseline (chest acceleration, 0.8848 F1) by 7.20 percentage points and removing major confusions between walking and stair climbing, though static sitting (0.685 F1) and standing (0.807 F1) remain challenging. On-node feature extraction is estimated to reduce transmission payload by 86.2\% relative to raw telemetry, supported by an ethical governance framework.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,23 +78,23 @@ Wearable Human Activity Recognition (HAR) using inertial sensors is central to r
 \label{sec:task1}
 
 \subsection{Dataset Provenance and Architecture}
-The Mobile HEALTH (MHEALTH) dataset, introduced by Ba{\~n}os et al.~\cite{banos2014mhealthdroid,banos2015sensor} and hosted on the UCI Machine Learning Repository~\cite{mhealth_uci_2014}, provides multimodal motion and physiological recordings for human activity benchmark analysis. Ten healthy volunteers (6 male, 4 female; aged 20--35) performed 12 physical activities in an out-of-laboratory setting.
+The Mobile HEALTH (MHEALTH) dataset, introduced by Ba{\~n}os et al.~\cite{banos2014mhealthdroid,banos2015sensor} and hosted on the UCI Machine Learning Repository~\cite{mhealth_uci_2014}, provides multimodal motion and physiological recordings for human activity benchmark analysis. Ten healthy volunteers of diverse physical profile performed 12 physical activities in an out-of-laboratory setting.
 
 Data was recorded using three Shimmer2 wearable inertial units attached to the chest, right wrist, and left ankle at a sampling frequency of $f_s = 50\,\text{Hz}$ ($\Delta t = 20\,\text{ms}$), which satisfies Nyquist sampling criteria for voluntary movement ($<20\,\text{Hz}$)~\cite{bulling2014tutorial}:
 \begin{enumerate}
-    \item \textbf{Chest Sensor:} Measures trunk tilt, gravitational alignment, and respiratory/cardiac motion via a tri-axial accelerometer ($\pm 1.5\,\text{g}$, $\text{m/s}^2$) and 2-lead electrocardiogram (ECG, $\text{mV}$).
-    \item \textbf{Left-Ankle Sensor:} Captures heel-strike impacts, propulsion, and stride frequency via a tri-axial accelerometer ($\pm 6\,\text{g}$), tri-axial gyroscope ($\pm 500^\circ/\text{s}$), and tri-axial magnetometer ($\pm 1\,\text{local field}$).
+    \item \textbf{Chest Sensor:} Measures trunk tilt, gravitational alignment, and respiratory/cardiac motion via a tri-axial accelerometer ($\text{m/s}^2$) and 2-lead electrocardiogram (ECG, $\text{mV}$).
+    \item \textbf{Left-Ankle Sensor:} Captures heel-strike impacts, propulsion, and stride frequency via a tri-axial accelerometer ($\text{m/s}^2$), tri-axial gyroscope (dimensionless sensor units), and tri-axial magnetometer~\cite{atallah2011sensor}.
     \item \textbf{Right-Wrist Sensor:} Captures forearm rotational rate, arm swing, and gestures via tri-axial accelerometer, gyroscope, and magnetometer.
 \end{enumerate}
 
 \begin{table*}[t]
 \centering
-\caption{Taxonomy of activities, nominal protocol, kinetic categorization, raw sample volume, and segmented 2.56-second window counts ($W=128$ samples) in the adapted MHEALTH dataset ($N=5,229$ windows across 10 participants).}
+\caption{Taxonomy of activities, nominal protocol, movement intensity classification, raw sample volume, and segmented 2.56-second window counts ($W=128$ samples) in the adapted MHEALTH dataset ($N=5,229$ windows across 10 participants).}
 \label{tab:activities}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{clllcc}
 \toprule
-\textbf{ID} & \textbf{Activity Name} & \textbf{Nominal Protocol} & \textbf{Kinetic Classification} & \textbf{Raw Samples} & \textbf{Windows} \\
+\textbf{ID} & \textbf{Activity Name} & \textbf{Nominal Protocol} & \textbf{Movement Intensity Classification} & \textbf{Raw Samples} & \textbf{Windows} \\
 \midrule
 $L_1$ & Standing still & 1 min timed & Static Postural Balance & 30,720 & 470 \\
 $L_2$ & Sitting and relaxing & 1 min timed & Static Sedentary Posture & 30,720 & 470 \\
@@ -115,53 +115,52 @@ $L_{12}$ & Jump front \& back & 20 repetitions & Explosive High-Impact Burst & 1
 }
 \end{table*}
 
-\subsection{Modifications in the Adapted Teaching Dataset}
-An inspection of the supplied archive (\texttt{MHEALTHDATASET\_MISSING}) identifies three key structural properties:
+\subsection{Dataset Properties and Curation}
+An inspection of the dataset identifies three structural properties:
 \begin{enumerate}
-    \item \textbf{Removal of Null Class (Label 0):} In the original benchmark, 70\% of samples were unlabelled transition intervals between exercises. The adapted dataset retains only the 12 active target classes ($L_1$ to $L_{12}$).
+    \item \textbf{Activity Class Scope:} In the benchmark recordings, unlabelled transition intervals between exercises accounted for over 70\% of raw samples. This work focuses on the 12 target physical activities ($L_1$ to $L_{12}$).
     \item \textbf{Sample Distributions:} The dataset contains 343,195 rows across 10 subject files (\texttt{mHealth\_subject1.log} to \texttt{mHealth\_subject10.log}). Timed activities ($L_1$--$L_5, L_9$--$L_{11}$) contain exactly 30,720 samples across participants ($\approx 61.4\,\text{s}$ per subject at 50\,Hz). Repetition-based tasks show cadence variation ($L_6$: 28,315; $L_7$: 29,441; $L_8$: 29,337). Jumping ($L_{12}$) contains 10,342 samples ($\approx 20.7\,\text{s}$ per subject), reflecting brief, explosive execution (Table~\ref{tab:activities}).
-    \item \textbf{Permuted Activity Sequences:} Activities were performed in different order across subjects (e.g., Subject 1 finishes with $L_5$, Subject 2 with $L_9$, and Subject 8 swaps $L_2$ and $L_3$). Consequently, preprocessing must not assume chronological uniformity across files.
+    \item \textbf{Sequence Permutation:} Activity execution order varies across participants (e.g., Subject 1 completes $L_5$ last, whereas Subject 8 swaps $L_2$ and $L_3$). Windowing and interpolation must therefore be bounded within individual activity segments to prevent cross-condition contamination.
 \end{enumerate}
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth,height=0.24\textheight]{fig1_sensor_waveforms.pdf}
-\caption{Representative 5-second tri-axial sensor waveform traces ($\Delta t = 20\,\text{ms}$, $f_s = 50\,\text{Hz}$) across contrasting biomechanical activities: Static Standing ($L_1$, left), Periodic Walking ($L_4$, centre), and Explosive Jumping ($L_{12}$, right) across Chest Acceleration, Ankle Acceleration, and Wrist Gyroscope.}
+\caption{Representative 5-second tri-axial sensor waveform traces ($\Delta t = 20\,\text{ms}$, $f_s = 50\,\text{Hz}$) across contrasting biomechanical activities: Static Standing ($L_1$, left), Periodic Walking ($L_4$, centre), and Explosive Jumping ($L_{12}$, right) across Chest Acceleration, Ankle Acceleration, and Wrist Gyroscope (sensor units).}
 \label{fig:waveforms}
 \end{figure*}
 
 \subsection{Exploratory Data Analysis: Kinematics and Synergy}
-We examine multi-axis kinematics across activity regimes to characterize pattern separability and sensor synergy.
+We examine multi-axis kinematics across activity regimes to characterise pattern separability and sensor synergy.
 
 \subsubsection{Signal Dynamics Across Activity Regimes}
 Figure~\ref{fig:waveforms} contrasts raw sensor waveforms across three physical regimes:
 \begin{itemize}
-    \item \textbf{Static Posture (Standing, $L_1$):} Signals show stationary profiles dominated by gravity. The Chest Accelerometer records $\approx -9.8\,\text{m/s}^2$ along the vertical axis, while Ankle and Wrist sensors register near-zero dynamic deviation ($<0.05\,\text{m/s}^2$) and low angular rates ($<2.5^\circ/\text{s}$).
-    \item \textbf{Periodic Locomotion (Walking, $L_4$):} Displays sinusoidal patterns at a gait frequency of $\approx 1.8\,\text{Hz}$. Ankle acceleration exhibits dynamic swings ($[-15, +25]\,\text{m/s}^2$) from cyclic heel-strike impacts, while the Wrist Gyroscope captures smooth angular velocity oscillations ($[-100, +80]^\circ/\text{s}$) from arm swing.
-    \item \textbf{Explosive Impact (Jumping, $L_{12}$):} Features intermittent landing spikes ($>30\,\text{m/s}^2$) on the ankle, followed by aerial micro-gravity phases ($\approx 0\,\text{m/s}^2$) and high-frequency wrist rotations ($>250^\circ/\text{s}$).
+    \item \textbf{Static Posture (Standing, $L_1$):} Signals show stationary profiles dominated by gravity. The Chest Accelerometer records $\approx -9.8\,\text{m/s}^2$ along the vertical axis, while Ankle and Wrist sensors register near-zero dynamic deviation ($<0.05\,\text{m/s}^2$) and low angular rates ($\text{VM} \approx 1.0$).
+    \item \textbf{Periodic Locomotion (Walking, $L_4$):} Displays sinusoidal patterns at a gait frequency of $\approx 1.8\,\text{Hz}$. Ankle acceleration exhibits dynamic swings ($[-15, +25]\,\text{m/s}^2$) from cyclic heel-strike impacts, while the Wrist Gyroscope captures smooth periodic oscillations from arm swing.
+    \item \textbf{Explosive Impact (Jumping, $L_{12}$):} Features intermittent landing spikes ($>30\,\text{m/s}^2$) on the ankle, followed by aerial micro-gravity phases ($\approx 0\,\text{m/s}^2$) and sharp wrist rotations.
 \end{itemize}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig2_activity_energy_distributions.pdf}
-\caption{Kinetic energy distributions across 10 participants: (a) Mean Ankle Acceleration Magnitude ($m/s^2$); (b) Mean Wrist Angular Velocity ($deg/s$). Points denote participant averages, illustrating inter-subject variation.}
+\caption{Movement intensity distributions across 10 participants: (a) Mean Ankle Acceleration Magnitude ($\text{m/s}^2$); (b) Mean Wrist Angular Velocity (sensor units). Points denote participant averages, illustrating inter-subject variation.}
 \label{fig:energy_dist}
 \end{figure}
 
-\subsubsection{Energy Stratification and Inter-Subject Variance}
+\subsubsection{Movement Intensity and Inter-Subject Variance}
 We compute instantaneous Vector Magnitude (VM) and Signal Magnitude Area (SMA) for each window:
 \begin{align}
     \text{VM}(t) &= \sqrt{x(t)^2 + y(t)^2 + z(t)^2} \\
     \text{SMA} &= \frac{1}{W}\sum_{t=1}^W \sum_{k} |s_k(t)|
 \end{align}
-Figure~\ref{fig:energy_dist} illustrates four distinct kinetic tiers:
+As shown in Figure~\ref{fig:energy_dist}, ankle acceleration magnitude separates physical intensity tiers, whereas wrist angular velocity magnitude maintains a narrow median across all activities ($\approx 1.0$--$1.2$ sensor units) and serves instead through directional and temporal dynamics. Across participant medians, ankle VM delineates:
 \begin{enumerate}
-    \item \textbf{Sedentary Tier ($L_1, L_2, L_3$):} Ankle acceleration reflects gravity ($9.81\,\text{m/s}^2$), and wrist angular rates remain below $5^\circ/\text{s}$.
-    \item \textbf{Moderate Ambulation ($L_4, L_5, L_9$):} Ankle acceleration averages $11.5$--$14.2\,\text{m/s}^2$, while cycling ($L_9$) shows low ankle variance but elevated rotational rates.
-    \item \textbf{Vigorous Locomotion ($L_{10}, L_{11}$):} Jogging and running generate high ankle kinetic energy ($18.5$--$27.0\,\text{m/s}^2$) and sustained wrist angular rates ($>120^\circ/\text{s}$).
-    \item \textbf{Calisthenic Bursts ($L_6, L_7, L_8, L_{12}$):} Display anatomical decoupling. Frontal arm elevation ($L_7$) generates high wrist rotation ($>90^\circ/\text{s}$) while the lower limbs remain stationary. Jumping ($L_{12}$) produces high lower-limb shock with variable wrist movement.
+    \item \textbf{Sedentary and Low-Intensity Tiers ($L_1$--$L_3, L_6$--$L_8$):} Ankle acceleration reflects gravitational equilibrium, with median values between $9.1$ and $9.5\,\text{m/s}^2$.
+    \item \textbf{Transitional and Moderate Ambulation ($L_5, L_9, L_4$):} Stair climbing ($L_5$) averages $10.0\,\text{m/s}^2$ and cycling ($L_9$) averages $9.7\,\text{m/s}^2$ (remaining low due to seated foot rotation), while walking ($L_4$) reaches $12.6\,\text{m/s}^2$ from heel impacts.
+    \item \textbf{Vigorous and Explosive Regimes ($L_{12}, L_{10}, L_{11}$):} Jumping ($L_{12}$) produces $14.9\,\text{m/s}^2$, jogging ($L_{10}$) reaches $16.3\,\text{m/s}^2$, and running ($L_{11}$) peaks at $19.7\,\text{m/s}^2$.
 \end{enumerate}
-The stripplot points in Figure~\ref{fig:energy_dist} highlight inter-subject variability; for example, Subject 3 exhibits 28\% higher running acceleration than Subject 6, reflecting personal differences in cadence and stride mechanics.
+The stripplot points in Figure~\ref{fig:energy_dist} highlight substantial inter-subject variability; for example, during running ($L_{11}$), Subject 3 exhibits 31\% higher ankle acceleration than Subject 4 ($22.6\,\text{m/s}^2$ vs $17.3\,\text{m/s}^2$), reflecting personal cadence and foot-strike mechanics.
 
 \begin{figure}[t]
 \centering
@@ -171,12 +170,13 @@ The stripplot points in Figure~\ref{fig:energy_dist} highlight inter-subject var
 \end{figure}
 
 \subsubsection{Cross-Modality Correlation and Complementarity}
-Figure~\ref{fig:correlation} presents the Pearson correlation matrix across 17 sensor channels. Intra-sensor axes show strong collinearity (e.g., Ankle Accel-X vs Accel-Z, $r = 0.54$), but cross-modality correlations remain low:
+Figure~\ref{fig:correlation} presents the Pearson correlation matrix across 17 sensor channels ($N=50,000$). Ankle acceleration axes are weakly correlated ($r = -0.08$ X-Z, $0.06$ X-Y, $0.15$ Y-Z), indicating independent spatial axes. The strongest channel correlations occur between Ankle-GyrX and Wrist-GyrZ ($r = 0.60$) and between ECG Leads 1 and 2 ($r = 0.52$).
+Cross-modality relationships demonstrate partial complementarity:
 \begin{itemize}
-    \item Wrist Gyroscope channels exhibit $|r| < 0.15$ with Ankle and Chest Accelerometers, confirming that rotational velocity provides complementary information to linear acceleration.
-    \item ECG Leads 1 and 2 show near-zero linear correlation ($|r| < 0.08$) with motion channels, operating on distinct physiological time scales.
+    \item Wrist Gyroscope channels exhibit correlations up to $|r| = 0.50$ with chest and ankle accelerometers (e.g., Ankle-AccZ vs Wrist-GyrY), capturing coupled limb movements rather than complete statistical independence.
+    \item ECG Leads 1 and 2 show near-zero linear correlation ($|r| \le 0.07$) with all motion channels, operating on distinct physiological time scales.
 \end{itemize}
-This low redundancy indicates that combining orthogonal modalities expands decision boundaries and mitigates unimodal blind spots~\cite{castanedo2013review}.
+This partial redundancy indicates that combining these modalities expands decision boundaries and mitigates unimodal blind spots~\cite{castanedo2013review}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SECTION 2: TASK 2 - MISSING DATA AND PREPROCESSING
@@ -186,20 +186,20 @@ This low redundancy indicates that combining orthogonal modalities expands decis
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.25\textheight]{fig4_missing_data_preprocessing.pdf}
-\caption{Missing data audit and preprocessing pipeline: (a) Percentage missingness per sensor channel (Channels 0--22); (b) Burst length frequency distribution, confirming 92.4\% single-sample drops (20\,ms); (c) Intra-segment linear interpolation on Chest Accel-Y during Walking ($L_4$), demonstrating accurate trajectory reconstruction without cross-activity boundary leakage.}
+\includegraphics[width=0.98\textwidth,height=0.24\textheight]{fig4_missing_data_preprocessing.pdf}
+\caption{Missing data audit and preprocessing pipeline: (a) Percentage missingness per sensor channel (Channels 0--22); (b) Burst length frequency distribution, confirming 90.4\% single-sample drops (20\,ms); (c) Intra-segment linear interpolation on Chest Accel-Y during Walking ($L_4$), demonstrating accurate trajectory reconstruction without cross-activity boundary leakage.}
 \label{fig:missing_preproc}
 \end{figure*}
 
 \subsection{Quantification and Diagnosis of Missingness}
-In wearable sensor networks, packet loss occurs via RF attenuation, body shadowing, and transmission collisions. In \texttt{MHEALTHDATASET\_MISSING}, missing entries appear as IEEE \texttt{NaN} values.
+Missing entries in wearable sensor streams arise from transmission dropouts, buffer overruns, or recording faults. Missing entries in the raw records are represented as IEEE \texttt{NaN} values.
 
-An audit reveals \textbf{615,648 missing values} across 343,195 time steps, yielding an overall missingness rate of \textbf{7.80\%} across the 23 sensor channels (Table~\ref{tab:missing_stats}). The activity label column contains zero missing values. Missingness varies across channels (Figure~\ref{fig:missing_preproc}(a)), from 1.13\% (Wrist Gyro-Y) to 14.67\% (Ankle Mag-Z), but remains uniform across participants (7.75\% to 7.84\%).
+An audit reveals \textbf{615,648 missing values} across 343,195 time steps, yielding an overall missingness rate of \textbf{7.80\%} across the 23 sensor channels (Table~\ref{tab:missing_stats}). The activity label column contains zero missing values. Missingness varies across channels (Figure~\ref{fig:missing_preproc}(a)), from 1.13\% (Wrist Gyro-Y) to 14.67\% (Ankle Mag-Z), but remains highly uniform across participants (7.75\% to 7.84\%) and across activities (7.72\% to 7.84\%).
 
 \subsubsection{Burst Length Analysis and Missingness Mechanism}
-To determine the missingness mechanism, we analyze consecutive missing sample runs (burst length $\ell = t_{\text{end}} - t_{\text{start}} + 1$). Figure~\ref{fig:missing_preproc}(b) shows that \textbf{92.4\% of bursts consist of a single sample} ($\Delta t = 20\,\text{ms}$). Bursts of $\ell = 2$ samples comprise 5.3\%, with a maximum burst length of $\ell_{\max} = 7$ samples ($140\,\text{ms}$) across the entire dataset. The mean burst length is $1.09 \pm 0.32$ samples.
+To diagnose the missingness mechanism, we analyse consecutive missing sample runs (burst length $\ell = t_{\text{end}} - t_{\text{start}} + 1$). Figure~\ref{fig:missing_preproc}(b) shows that \textbf{90.4\% of bursts consist of a single sample} ($\Delta t = 20\,\text{ms}$). Bursts of $\ell = 2$ samples comprise 8.5\%, with a maximum burst length of $\ell_{\max} = 7$ samples ($140\,\text{ms}$) across the entire dataset. The mean burst length is $1.11 \pm 0.35$ samples.
 
-Because packet loss occurs independently of signal amplitude ($P(\text{missing} \mid \mathbf{x}, y) = P(\text{missing})$) and bursts are brief, the data adheres to the \textbf{Missing Completely at Random (MCAR)} mechanism~\cite{lara2013survey}.
+The occurrence of missing entries is independent of signal magnitude and participant activity ($P(\text{missing} \mid \mathbf{x}, y) = P(\text{missing})$), with isolated single-sample losses dominating (90.4\%). This pattern conforms to the \textbf{Missing Completely at Random (MCAR)} mechanism~\cite{little2019statistical}.
 
 \begin{table}[t]
 \centering
@@ -235,8 +235,8 @@ where $t_a$ and $t_b$ are the nearest observed samples.
 \textbf{Preventing Boundary Leakage:} Interpolating across raw file boundaries would mix adjacent activities (e.g., interpolating jumping impacts into stair climbing). To avoid boundary mixing, our pipeline enforces \textbf{segment-bounded intra-run grouping}:
 \begin{enumerate}
     \item Partition subject logs into contiguous activity runs: $\mathcal{R}_k = \{(\mathbf{x}_t, y_t) \mid y_t = y_{t-1}\}$.
-    \item Execute linear interpolation strictly within each run $\mathcal{R}_k$.
-    \item Resolve initial/final segment missing values via intra-segment boundary replication (\texttt{limit\_direction='both'}).
+    \item Execute linear interpolation within each run $\mathcal{R}_k$.
+    \item Resolve initial/final segment missing values via intra-segment boundary replication (\texttt{limit\_direction=both}).
 \end{enumerate}
 Figure~\ref{fig:missing_preproc}(c) shows that this approach reconstructs acceleration waveforms without cross-activity leakage. Post-processing confirms \textbf{zero residual missing values} (Table~\ref{tab:missing_stats}).
 
@@ -246,24 +246,24 @@ Wearable signals must be windowed to capture temporal structure while supporting
 \subsubsection{Window Size and Overlap}
 We apply a sliding window of $W = 128$ samples ($T = 2.56\,\text{s}$ at $50\,\text{Hz}$) with 50\% overlap ($\Delta W = 64$ samples, $1.28\,\text{s}$):
 \begin{enumerate}
-    \item \textbf{Gait Periodicity:} Walking cadences range from 1.5 to 2.2 steps/s (stride time $\approx 0.9$--$1.3\,\text{s}$)~\cite{lara2013survey}. A 2.56-second window captures over two full strides, supporting statistical stationarity.
-    \item \textbf{Radix-2 FFT Efficiency:} Setting $W = 128 = 2^7$ optimizes Fast Fourier Transform execution without padding artifacts.
+    \item \textbf{Gait Periodicity:} Walking cadences range from 1.5 to 2.2 steps/s (stride time $\approx 0.9$--$1.3\,\text{s}$). A 2.56-second window captures over two full strides, supporting statistical stationarity.
+    \item \textbf{Radix-2 FFT Efficiency:} Setting $W = 128 = 2^7$ optimises Fast Fourier Transform execution without padding artefacts.
     \item \textbf{Inference Latency:} A 1.28-second step provides responsive tracking suitable for health monitoring.
 \end{enumerate}
-Windows are extracted strictly within each activity run $\mathcal{R}_k$, avoiding boundary crossing and producing $N = 5,229$ segmented windows.
+Windows are extracted within each activity run $\mathcal{R}_k$, avoiding boundary crossing and producing $N = 5,229$ segmented windows.
 
 \subsubsection{Extracted Features}
 For each 3-axis sensor stream $\mathbf{S} \in \mathbb{R}^{128 \times 3}$, we extract 53 features:
 \begin{itemize}
     \item \textbf{Time-Domain Statistics (33 dims):} Mean $\mu$, standard deviation $\sigma$, variance $\sigma^2$, min, max, peak-to-peak range, median, interquartile range (IQR), skewness, kurtosis, and root mean square (RMS) per axis.
-    \item \textbf{Kinetic Energy (5 dims):} Mean, standard deviation, min, and max of the Vector Magnitude $\text{VM}(t)$, plus Signal Magnitude Area ($\text{SMA}$).
+    \item \textbf{Movement Intensity (5 dims):} Mean, standard deviation, min, and max of the Vector Magnitude $\text{VM}(t)$, plus Signal Magnitude Area ($\text{SMA}$).
     \item \textbf{Axis Correlation (3 dims):} Pairwise Pearson coefficients $\rho_{xy}, \rho_{xz}, \rho_{yz}$.
     \item \textbf{Frequency-Domain Features (12 dims):} Computed via real-valued FFT ($N_{\text{bins}} = 65$, $\Delta f = 0.39\,\text{Hz}$). Extracts Spectral Energy $E$, Spectral Entropy $H$, Dominant Frequency $f_{\text{dom}}$, and Peak Amplitude per axis.
 \end{itemize}
 Extracting 53 features across three sensor sources yields a 159-dimensional multimodal feature space per window.
 
 \subsubsection{Standardisation}
-All features are standardized via Z-score scaling ($z = (x - \mu) / \sigma$). Parameters $\mu_{\text{train}}$ and $\sigma_{\text{train}}$ are computed \textbf{strictly on the Training split} (Subjects 1--7) and applied to Validation and Testing sets, ensuring no test set leakage.
+All features are standardised via Z-score scaling ($z = (x - \mu) / \sigma$). Parameters $\mu_{\text{train}}$ and $\sigma_{\text{train}}$ are computed on the Training split (Subjects 1--7) and applied to Validation and Testing sets, ensuring no test set leakage.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SECTION 3: TASK 3 - MULTIMODAL FUSION AND MODELLING
@@ -285,7 +285,7 @@ We select three sensor sources spanning two physical modalities:
     \item \textbf{Left-Ankle Accelerometer (Linear Acceleration, 3 axes; Cols 5--7):} Measures ground impact shocks and lower-limb cadence, separating walking ($L_4$), climbing stairs ($L_5$), and running ($L_{11}$).
     \item \textbf{Right-Wrist Gyroscope (Angular Velocity, 3 axes; Cols 17--19):} Measures forearm rotational rates, identifying arm elevations ($L_7$), waist twists, and arm swings during cycling and running.
 \end{enumerate}
-This selection provides full-body kinematic coverage across trunk, lower extremity, and upper extremity.
+This selection provides kinematic coverage across trunk, lower extremity, and upper extremity.
 
 \subsection{Subject-Independent Experimental Design}
 Randomly partitioning windows across subjects leaks personal biomechanical traits between splits, inflating performance estimates. We enforce a \textbf{Subject-Independent Partition}:
@@ -334,16 +334,16 @@ We implement five model configurations in PyTorch:
     \begin{equation}
         \mathbf{p}_{\text{late}}(\mathbf{x}) = \sum_{m} w_m \mathbf{p}_m(\mathbf{x}), \quad \sum w_m = 1
     \end{equation}
-    where weights reflect validation Macro-F1: $w_{\text{chest}} = 0.358$, $w_{\text{ankle}} = 0.395$, and $w_{\text{wrist}} = 0.247$.
+    where weights reflect validation Macro-F1 on Subject 8: $w_{\text{chest}} = 0.358$, $w_{\text{ankle}} = 0.395$, and $w_{\text{wrist}} = 0.247$.
 \end{enumerate}
 
 \subsection{Training and Convergence Diagnostics}
-Addressing previous feedback regarding fixed budgets, all models were trained for 45 epochs using AdamW ($1 \times 10^{-4}$ weight decay), gradient clipping at 2.0, and Cosine Annealing learning rate decay ($10^{-3}$ to $10^{-5}$). Checkpoints were selected by peak validation Macro-F1.
+All models were trained for 45 epochs using AdamW ($1 \times 10^{-4}$ weight decay), gradient clipping at 2.0, and Cosine Annealing learning rate decay ($10^{-3}$ to $10^{-5}$). Model checkpointing and hyperparameter decisions were driven by validation performance on Subject 8.
 
 Figure~\ref{fig:training_curves} confirms stable convergence:
 \begin{itemize}
     \item Training and validation loss curves decrease smoothly and plateau after Epoch 25.
-    \item Peak validation F1 occurs at Epoch 18 for Early Fusion (0.8624), Epoch 19 for Ankle (0.8370), Epoch 11 for Wrist (0.5235), and Epoch 8 for Chest (0.7575).
+    \item Peak validation F1 on Subject 8 occurs at Epoch 18 for Early Fusion (0.8624), Epoch 19 for Ankle (0.8370), Epoch 11 for Wrist (0.5235), and Epoch 8 for Chest (0.7575).
     \item Validation loss does not diverge, demonstrating regularisation effectiveness.
 \end{itemize}
 
@@ -355,18 +355,16 @@ Figure~\ref{fig:training_curves} confirms stable convergence:
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
-\caption{Normalized test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10; values are row-normalised \%), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
+\includegraphics[width=\textwidth,height=0.325\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
+\caption{Normalised test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10; values are row-normalised \%), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
 \label{fig:confusion_matrices}
 \end{figure*}
-
-
 
 \subsection{Model Evaluation}
 Table~\ref{tab:overall_results} reports test performance across 1,035 windows from unseen Subjects 9 and 10. Both multimodal architectures outperform all unimodal baselines:
 \begin{itemize}
-    \item \textbf{Late Fusion achieves the strongest performance}, with \textbf{95.56\% accuracy}, \textbf{0.9721 Macro-Precision}, \textbf{0.9592 Macro-Recall}, and \textbf{0.9568 Macro-F1}.
-    \item \textbf{Early Fusion performs comparably}, with \textbf{95.27\% accuracy} and \textbf{0.9537 Macro-F1}.
+    \item \textbf{Late Fusion achieves the highest test metrics}, with \textbf{95.56\% accuracy}, \textbf{0.9721 Macro-Precision}, \textbf{0.9592 Macro-Recall}, and \textbf{0.9568 Macro-F1}.
+    \item \textbf{Early Fusion performs comparably}, with \textbf{95.27\% accuracy} and \textbf{0.9537 Macro-F1}, confirming that both input-level and decision-level fusion capture cross-sensor synergies effectively.
     \item Compared to the best unimodal baseline (Chest Accel: 88.48\% F1), Late Fusion provides a \textbf{+7.20\% absolute Macro-F1 gain}; compared to Wrist Gyro (82.53\% F1), the gain is \textbf{+13.15\%}.
 \end{itemize}
 
@@ -400,49 +398,45 @@ Early Fus. & 0.9527 & 0.9695 & 0.9565 & 0.9537 & 76,172 & 0.031 \\
 \toprule
 \textbf{Activity Class} & \textbf{Chest} & \textbf{Ankle} & \textbf{Wrist} & \textbf{Early} & \textbf{Late} & \textbf{Biomechanical Interpretation \& Error Analysis} \\
 \midrule
-$L_1$: Standing still & 0.749 & 0.659 & 0.880 & 0.800 & 0.807 & Modality fusion resolves trunk vertical alignment ambiguities. \\
-$L_2$: Sitting and relaxing & 0.496 & 0.644 & 0.694 & 0.662 & 0.685 & Primary error mode: static gravitational overlap with $L_1$; improved by wrist tilt. \\
-$L_3$: Lying down & 1.000 & 1.000 & 0.810 & 0.995 & 1.000 & Gravitational acceleration vector rotates $90^\circ$ onto horizontal plane. \\
-$L_4$: Walking & 0.676 & 1.000 & 0.822 & 1.000 & 1.000 & Lower-limb heel-strike dynamics completely resolve trunk confusion. \\
-$L_5$: Climbing stairs & 0.783 & 0.951 & 0.963 & 1.000 & 1.000 & Ankle vertical dorsiflexion and step cadence cleanly isolate stair steps. \\
-$L_6$: Waist bends forward & 1.000 & 0.775 & 0.522 & 0.994 & 1.000 & Torso pitch tilt dominates ($1.000$); wrist is largely static ($0.522$). \\
-$L_7$: Frontal arm elevation & 1.000 & 0.739 & 1.000 & 1.000 & 1.000 & Forearm angular velocity ($1.000$) resolves lower-limb stationary posture. \\
-$L_8$: Knees bending (crouching) & 0.978 & 0.713 & 0.746 & 0.994 & 1.000 & Joint multi-limb coordination isolates cyclic knee flexion and crouching. \\
-$L_9$: Cycling & 1.000 & 0.931 & 0.926 & 1.000 & 1.000 & Smooth rotary foot cadence easily distinguished from impact walking. \\
-$L_{10}$: Jogging & 0.967 & 0.978 & 0.995 & 1.000 & 0.995 & Elevated kinetic energy and high stride rate across all bodily extremities. \\
-$L_{11}$: Running & 0.969 & 0.979 & 1.000 & 1.000 & 0.995 & Peak cadence and acceleration power across all sensor nodes. \\
-$L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & Violent ground impact shocks ($>30\,\text{m/s}^2$) suppress wrist angular noise. \\
+$L_1$: Standing still & 0.749 & 0.659 & 0.880 & 0.800 & 0.807 & Fusion reaches 0.807 F1; wrist alone attains 0.880 due to stable resting posture. \\
+$L_2$: Sitting and relaxing & 0.496 & 0.644 & 0.694 & 0.662 & 0.685 & Chest baseline confuses 33\% with $L_1$; late fusion reaches 0.685; wrist achieves 0.694. \\
+$L_3$: Lying down & 1.000 & 1.000 & 0.810 & 0.995 & 1.000 & Gravity rotates onto horizontal plane; chest and ankle isolate recumbent posture. \\
+$L_4$: Walking & 0.676 & 1.000 & 0.822 & 1.000 & 1.000 & Chest confuses 49\% with stairs; ankle impacts eliminate confusion (1.000 F1). \\
+$L_5$: Climbing stairs & 0.783 & 0.951 & 0.963 & 1.000 & 1.000 & Ankle vertical dorsiflexion and step cadence isolate stair stepping (1.000 F1). \\
+$L_6$: Waist bends forward & 1.000 & 0.775 & 0.522 & 0.994 & 1.000 & Torso pitch tilt dominates chest accel (1.000); wrist remains largely static (0.522). \\
+$L_7$: Frontal arm elevation & 1.000 & 0.739 & 1.000 & 1.000 & 1.000 & Forearm angular velocity (1.000) isolates movement while lower body remains static. \\
+$L_8$: Knees bending (crouching) & 0.978 & 0.713 & 0.746 & 0.994 & 1.000 & Coordinated ankle and chest kinematics isolate crouch flexion (1.000 F1). \\
+$L_9$: Cycling & 1.000 & 0.931 & 0.926 & 1.000 & 1.000 & Periodic rotary foot cadence without foot-strike shocks yields 1.000 F1. \\
+$L_{10}$: Jogging & 0.967 & 0.978 & 0.995 & 1.000 & 0.995 & Elevated kinetic shock and stride cadence across all limbs yield 0.995 F1. \\
+$L_{11}$: Running & 0.969 & 0.979 & 1.000 & 1.000 & 0.995 & Peak cadence and acceleration power across all sensor nodes reach 0.995 F1. \\
+$L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & High ground impact shocks ($>30\,\text{m/s}^2$) isolate jumps; wrist noise is suppressed. \\
 \midrule
-\textbf{Macro-Average F1} & \textbf{0.8848} & \textbf{0.8641} & \textbf{0.8253} & \textbf{0.9537} & \textbf{0.9568} & \textbf{Multimodal fusion eliminates unimodal failure modes across all tasks.} \\
+\textbf{Macro-Average F1} & \textbf{0.8848} & \textbf{0.8641} & \textbf{0.8253} & \textbf{0.9537} & \textbf{0.9568} & \textbf{Multimodal fusion consistently outperforms unimodal baselines across dynamic and static activities.} \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.165\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
+\includegraphics[width=0.98\textwidth,height=0.130\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
 \caption{Multi-class classification curves across all five models on unseen test subjects: (a) Macro-Average Receiver Operating Characteristic (ROC) curves; (b) Macro-Average Precision-Recall (PR) curves.}
 \label{fig:roc_pr}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth,height=0.145\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
+\includegraphics[width=\textwidth,height=0.118\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
 \caption{Embedded deployment trade-offs: (a) Macro-F1 vs Trainable Parameters; (b) Macro-F1 vs Single-Window Inference Latency (ms).}
 \label{fig:computational_tradeoffs}
 \end{figure*}
 
-
-
 \subsection{Per-Class Performance and Error Analysis}
-Table~\ref{tab:per_class_f1} provides a per-class F1 breakdown across all 12 classes for all five models.
-
-Combined with Figure~\ref{fig:confusion_matrices}, these results show how fusion resolves unimodal errors:
+Table~\ref{tab:per_class_f1} provides a per-class F1 breakdown across all 12 classes for all five models. Combined with Figure~\ref{fig:confusion_matrices}, these results show how fusion resolves unimodal errors:
 \begin{enumerate}
-    \item \textbf{Ambulatory Confusion ($L_4$ Walking vs $L_5$ Stairs):} Chest Accel achieves only 0.676 F1 on walking, confusing 31\% of windows with stairs due to similar vertical trunk motion. Ankle Accel achieves \textbf{1.000 F1} on walking because dorsiflexion and foot impact profiles differ on stairs. Early and Late Fusion both achieve \textbf{1.000 F1} on walking and stairs.
+    \item \textbf{Ambulatory Confusion ($L_4$ Walking vs $L_5$ Stairs):} Chest Accel achieves only 0.676 F1 on walking, recalling 51\% of walking windows while misclassifying 49\% as stairs ($L_5$) due to similar vertical trunk motion. Ankle Accel achieves \textbf{1.000 F1} on walking because heel strikes and dorsiflexion kinematics differ from stairs. Early and Late Fusion both achieve \textbf{1.000 F1} on walking and stairs.
     \item \textbf{Upper-Limb Gestures ($L_6$ Waist Bends vs $L_7$ Arm Elevation):} Wrist Gyro achieves only $F_1 = 0.522$ on waist bends, as hands remain fixed relative to the trunk. Chest Accel achieves \textbf{1.000 F1} due to forward pitch. Conversely, Ankle Accel achieves only 0.739 F1 on arm elevation ($L_7$) because the lower body is motionless; Wrist Gyro scores 1.000 F1. Fusion resolves both cases, scoring \textbf{1.000 F1}.
     \item \textbf{Explosive Impacts ($L_{12}$ Jumping):} Wrist Gyro achieves $F_1 = 0.545$ on jumping, confusing arm recoil with general movement. Chest and Ankle Accelerometers record clear impact spikes ($F_1 = 1.000$), enabling fusion models to achieve \textbf{1.000 F1}.
-    \item \textbf{Sitting ($L_2$) vs Standing ($L_1$):} The remaining confusion across models is between Sitting ($L_2$, F1 = 0.685) and Standing ($L_1$, F1 = 0.807). Because the trunk remains vertical ($1\,\text{g}$ along the vertical axis) and both sensors are stationary, distinction relies on subtle differences in posture and wrist rest angle. Fusion improves sitting F1 from 0.496 (chest baseline) to 0.685.
+    \item \textbf{Sitting ($L_2$) vs Standing ($L_1$):} The primary residual confusion across models is between Sitting ($L_2$, F1 = 0.685) and Standing ($L_1$, F1 = 0.807). Because the trunk remains vertical ($1\,\text{g}$ along the vertical axis) and both sensors are stationary, distinction relies on subtle differences in posture and wrist rest angle. The unimodal wrist baseline attains higher F1 on sitting (0.694) and standing (0.880) than late fusion, as forearm resting inclination provides discriminatory static cues.
 \end{enumerate}
 
 \subsection{ROC and Precision-Recall Dynamics}
@@ -452,25 +446,19 @@ Figure~\ref{fig:roc_pr} shows macro-average ROC and Precision-Recall curves:
     \item Under class imbalance ($L_{12}$ has fewer samples), Precision-Recall curves (Figure~\ref{fig:roc_pr}(b)) confirm fusion advantages: Late Fusion attains $\text{AUC-PR} = 0.994$ and Early Fusion attains $0.982$, outperforming Chest (0.958), Ankle (0.915), and Wrist (0.887).
 \end{itemize}
 
-
-
-
-
 \subsection{Trade-offs: Early vs Late Fusion}
-The fusion paradigms present distinct engineering trade-offs:
+The two fusion paradigms present distinct architectural trade-offs:
 \begin{itemize}
-    \item \textbf{Early Fusion:} Permits the network to model joint cross-sensor dependencies from input features. However, it requires all sensors to be present; missing one node breaks the 159-dimensional vector.
-    \item \textbf{Late Fusion:} Provides modularity and fault tolerance. Each unimodal network operates independently, allowing dynamic weight re-normalisation if a sensor disconnects. Late Fusion slightly exceeds Early Fusion on Macro-F1 (0.9568 vs 0.9537) by avoiding high-dimensional feature interference.
+    \item \textbf{Early Fusion:} Learning joint cross-sensor interactions directly from concatenated features yields a compact unified model (76,172 parameters). However, inference strictly requires complete feature vectors across all three anatomical locations, making the pipeline vulnerable to single-node communication dropouts.
+    \item \textbf{Late Fusion:} Unimodal networks operate independently, enabling modular fault tolerance where active prediction weights can be re-normalised dynamically if a sensor disconnects. Late Fusion attains the highest classification performance (0.9568 Macro-F1) while preserving modality-specific representations prior to decision integration.
 \end{itemize}
-
-
 
 \subsection{Computational Implications for Edge Deployment}
 Deploying multimodal inference on resource-constrained microcontrollers (e.g., ARM Cortex-M4) introduces specific constraints:
 \begin{enumerate}
     \item \textbf{Memory Footprint:} Unimodal MLPs require 16,332 parameters ($\approx 65.3\,\text{KB}$ in float32). Early Fusion scales to 76,172 parameters ($\approx 304.7\,\text{KB}$), while Late Fusion combines three networks totaling 48,996 parameters ($\approx 196.0\,\text{KB}$) (Figure~\ref{fig:computational_tradeoffs}(a)), fitting within typical 512\,KB SRAM budgets.
-    \item \textbf{Inference Latency:} Benchmarking 1,000 single-window passes on CPU yields \textbf{0.031\,ms for Early Fusion} and \textbf{0.095\,ms for Late Fusion} (Figure~\ref{fig:computational_tradeoffs}(b)). Late Fusion is slower due to evaluating three models sequentially, but 0.095\,ms uses $<0.01\%$ of the 1,280\,ms window budget.
-    \item \textbf{Bandwidth and Energy:} Bluetooth LE radio transmission consumes $\approx 15$--$25\,\text{mW}$, whereas microcontroller computation requires $<2\,\text{mW}$~\cite{lara2013survey}. Transmitting raw 50\,Hz data requires $128 \times 3 \times 4 = 1,536\,\text{bytes}$ per window. Extracting 53 features locally reduces telemetry to $53 \times 4 = 212\,\text{bytes}$---\textbf{an 86.2\% bandwidth saving}.
+    \item \textbf{Inference Latency:} Benchmarking 1,000 single-window passes on CPU yields \textbf{0.030\,ms for unimodal baselines}, \textbf{0.031\,ms for Early Fusion}, and \textbf{0.095\,ms for Late Fusion} (Figure~\ref{fig:computational_tradeoffs}(b)). Late Fusion evaluates three networks sequentially, but 0.095\,ms uses $<0.01\%$ of the 1,280\,ms window budget.
+    \item \textbf{Bandwidth and Energy:} Wireless radio transmission consumes substantially more power than local microcontroller computation. Transmitting raw 50\,Hz data requires $128 \times 3 \times 4 = 1,536\,\text{bytes}$ per sensor per window. Extracting 53 features locally reduces telemetry payload to $53 \times 4 = 212\,\text{bytes}$ per sensor window---\textbf{an estimated 86.2\% payload reduction}.
     \item \textbf{Clock Synchronisation:} Early fusion requires sub-millisecond time alignment across nodes. Late fusion is more tolerant of arrival jitter, as unimodal decisions can be aggregated with timestamp buffers.
 \end{enumerate}
 
@@ -483,7 +471,7 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 \begin{table*}[t]
 \centering
 \scriptsize
-\renewcommand{\arraystretch}{0.84}
+\renewcommand{\arraystretch}{0.68}
 \setlength{\tabcolsep}{3.5pt}
 \caption{Ethical Risk Matrix and Regulatory Governance Controls for Wearable Multimodal Activity Recognition.}
 \label{tab:ethics_matrix}
@@ -491,35 +479,33 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 \toprule
 \textbf{Risk Category} & \textbf{Regulatory Framework} & \textbf{Clinical / Social Hazard} & \textbf{Actionable Engineering Control} \\
 \midrule
-\textbf{Biometric Privacy \& Surveillance} & GDPR Art.~4(14), Art.~9; HIPAA \S164.514; Privacy Act APP~3 \& 6 & Tri-axial gait dynamics uniquely fingerprint individuals, risking unauthorized tracking and habit exposure. & \textbf{Edge Computing:} Raw kinematic streams never leave local nodes; only encrypted classifications are transmitted via BLE 5.3 (AES-128). \\
+\textbf{Biometric Privacy \& Surveillance} & GDPR Art.~4(14), Art.~9; HIPAA 45 CFR \S164.514; Privacy Act APP~3 \& APP~11 & Tri-axial gait dynamics uniquely fingerprint individuals, risking unauthorized tracking and habit exposure. & \textbf{Edge Extraction:} Transmitting 212-byte feature vectors or local classifications via BLE 5.3 with AES-128 encryption, avoiding raw signal transmission. \\
 \midrule
-\textbf{Automated Decision Harm} & GDPR Art.~22; EU AI Act High-Risk Class IIa & False negatives in fall or cardiac monitoring can delay emergency intervention or cause clinical harm. & \textbf{Human-in-the-Loop Fallback:} Predictions act as decision support; high-stakes interventions require clinician verification. \\
+\textbf{Automated Decision Harm} & EU MDR Class IIa; EU AI Act High-Risk Class IIa; GDPR Art.~22 & False negatives in fall or cardiac monitoring can delay emergency intervention or cause clinical harm. & \textbf{Human-in-the-Loop Fallback:} Predictions act as decision support; high-stakes interventions require clinician verification. \\
 \midrule
 \textbf{Demographic \& Biomechanical Bias} & EU AI Act Art.~10; Australian AI Ethics Principles & Models trained on young, healthy subjects degrade on elderly or mobility-impaired cohorts (e.g., Parkinson's). & \textbf{Stratified Multi-Cohort Auditing:} Post-market bias audits across age ($>65$), BMI, and pathologies; adaptive cohort fine-tuning. \\
 \midrule
-\textbf{Sensor Dropout \& Failure Hazard} & ISO 13485; FDA SaMD Guidance & Wireless limb sensor disconnection could cause classifier crashes or hallucinated predictions during critical care. & \textbf{Dynamic Modular Fallback:} Late fusion architecture dynamically reweights active sensors upon packet loss, ensuring graceful degradation. \\
+\textbf{Sensor Dropout \& Failure Hazard} & ISO 13485 (Medical QMS); FDA SaMD Guidance & Wireless limb sensor disconnection could cause classifier crashes or hallucinated predictions during critical care. & \textbf{Dynamic Modular Fallback:} Late fusion architecture dynamically reweights active sensors upon packet loss, enabling degraded operation. \\
 \midrule
-\textbf{Informed Consent \& Minimisation} & GDPR Art.~5(1)(c); Privacy Act APP~11 & Unbounded multi-sensor tracking collects extraneous private telemetry beyond clinical monitoring necessity. & \textbf{Purpose-Bound Gating:} Dynamic duty-cycling activates high-power sensors (ECG, Gyro) only when ambiguous motion is detected. \\
+\textbf{Informed Consent \& Minimisation} & GDPR Art.~5(1)(c); Privacy Act APP~3 (Consent) \& APP~11 (Security) & Unbounded multi-sensor tracking collects extraneous private telemetry beyond clinical monitoring necessity. & \textbf{Purpose-Bound Gating:} Dynamic duty-cycling activates high-power sensors (ECG, Gyro) only when ambiguous motion is detected. \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-
-
-Deploying continuous wearable sensing in clinical environments presents key ethical, legal, and operational considerations (Table~\ref{tab:ethics_matrix}).
+Deploying continuous wearable sensing in clinical environments presents ethical, legal, and operational considerations (Table~\ref{tab:ethics_matrix}).
 
 \subsection{Biometric Privacy Frameworks}
-Wearable motion data contains identifying signatures. Prior biomechanical research indicates that tri-axial gait acceleration can fingerprint individuals with $>95\%$ accuracy, while ECG traces expose cardiac conditions and autonomic state~\cite{bulling2014tutorial}.
+Wearable motion data contains identifying signatures. Prior biomechanical research indicates that tri-axial gait acceleration can support user identification, while ECG traces expose cardiac conditions and autonomic state~\cite{bulling2014tutorial}.
 
 These data streams require structured governance:
 \begin{enumerate}
-    \item \textbf{GDPR:} Under GDPR Article~4(14), gait acceleration constitutes biometric data, while cardiac measurements fall under \textbf{Special Category Health Data (Article~9)}, requiring explicit consent (Article~6(1)(a) and 9(2)(a)). Article~22 restricts automated decision-making without clinical oversight.
-    \item \textbf{HIPAA:} In clinical settings, wearable telemetry constitutes Protected Health Information (PHI), requiring encryption under the HIPAA Security Rule (45 CFR Part 164).
-    \item \textbf{Australian Privacy Principles (APPs):} Under the Privacy Act 1988, biometric and health data are classified as \textbf{Sensitive Information} (APP~3), requiring express consent and secure data lifecycle handling (APP~11).
+    \item \textbf{GDPR:} Under GDPR Article~4(14)~\cite{gdpr2016}, gait acceleration constitutes biometric data, while cardiac measurements fall under \textbf{Special Category Health Data (Article~9)}, requiring explicit consent (Article~6(1)(a) and 9(2)(a)). Article~22 restricts automated decision-making without clinical oversight.
+    \item \textbf{HIPAA:} In clinical settings, wearable telemetry constitutes Protected Health Information (PHI), requiring encryption under the HIPAA Security Rule (45 CFR Part 164)~\cite{hipaa1996}.
+    \item \textbf{Australian Privacy Principles (APPs):} Under the Privacy Act 1988, biometric and health data are classified as \textbf{Sensitive Information} (APP~3), requiring express consent and secure data lifecycle handling (APP~11)~\cite{oaic_app_2021}.
 \end{enumerate}
 
 \subsection{Algorithmic Bias and Demographic Generalisation}
-The MHEALTH dataset was collected from 10 healthy young adult volunteers (aged 20--35), creating key clinical generalisation risks:
+The MHEALTH dataset was collected from 10 healthy adult participants, creating clinical generalisation risks:
 \begin{itemize}[leftmargin=*,nosep]
     \item \textbf{Age Biomechanics:} Older adults exhibit reduced stride length, slower cadence, and altered balance sway; models trained on young cohorts risk misclassifying normal elderly gait as abnormal.
     \item \textbf{Mobility Impairments:} Pathologies like post-stroke hemiplegia or Parkinsonian tremors alter movement dynamics, increasing false alarms without adaptive fine-tuning on clinical cohorts.
@@ -530,11 +516,12 @@ The MHEALTH dataset was collected from 10 healthy young adult volunteers (aged 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Limitations and Future Improvements}
 \label{sec:limitations}
-Key technical limitations and future research avenues include:
+Technical limitations and future research avenues include:
 \begin{enumerate}[leftmargin=*,nosep]
+    \item \textbf{Cross-Subject Evaluation:} The subject-independent split provides an established validation protocol; extending evaluation to leave-one-subject-out cross-validation across all 10 participants would further quantify variance across individual kinematic signatures.
     \item \textbf{Sitting vs Standing Resolution:} Confusion between Sitting ($L_2$) and Standing ($L_1$) remains the primary residual error (Table~\ref{tab:per_class_f1}). Adding a thigh-mounted IMU would directly capture femoral orientation ($90^\circ$ difference), resolving this ambiguity.
-    \item \textbf{Deep Temporal Architectures:} While engineered features enable ultra-lightweight edge inference, evaluating end-to-end models (e.g., DeepConvLSTM~\cite{ordonez2016deep} or Transformers~\cite{radu2018multimodal}) on raw interpolated streams warrants investigation.
-    \item \textbf{Dropout Stress-Testing:} Empirical testing under simulated packet loss (10\%--50\%) would further quantify the fault tolerance of the late-fusion ensemble under extreme BLE link degradation.
+    \item \textbf{Deep Temporal Architectures:} While engineered statistical features support ultra-low edge latency, end-to-end sequential architectures (e.g., DeepConvLSTM~\cite{ordonez2016deep} or multimodal convolutional networks~\cite{radu2018multimodal}) could learn hierarchical spatio-temporal dynamics directly from raw waveforms.
+    \item \textbf{Sensor Dropout Stress-Testing:} Evaluating classifier degradation under simulated packet loss (10\%--50\%) would benchmark the operational fault tolerance of modular late fusion under unstable wireless channels.
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -542,13 +529,14 @@ Key technical limitations and future research avenues include:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 \label{sec:conclusion}
-This report demonstrated an end-to-end multimodal pipeline on adapted MHEALTH. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, eliminating unimodal ambiguities. Edge profiling confirmed an 86.2\% telemetry bandwidth saving via local feature extraction, supported by a governance framework aligned with international privacy standards.
+This work presented an end-to-end multimodal classification pipeline on the MHEALTH benchmark. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, outperforming unimodal baselines and eliminating major ambulatory confusions, though static sitting and standing remain challenging. Edge profiling confirmed an estimated 86.2\% telemetry payload reduction via local feature extraction, supported by a governance framework aligned with international privacy standards.
 
 \let\oldbibliography\thebibliography
 \renewcommand{\thebibliography}[1]{%
   \oldbibliography{#1}%
-  \scriptsize
-  \setlength{\itemsep}{-2.5pt}%
+  \fontsize{6.5pt}{7.5pt}\selectfont
+  \setlength{\itemsep}{-3.5pt}%
+  \setlength{\parsep}{0pt}%
   \setlength{\parskip}{0pt}%
 }
 
