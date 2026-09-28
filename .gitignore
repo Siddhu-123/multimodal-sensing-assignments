@@ -13,7 +13,7 @@ ass1/fer2013.csv.zip
 ass2/MHEALTHDATASET_MISSING/
 ass1/tmp/
 
-# LaTeX compilation intermediates
+# LaTeX compilation intermediates and build outputs
 *.aux
 *.fls
 *.fdb_latexmk
@@ -21,9 +21,10 @@ ass1/tmp/
 *.out
 *.synctex.gz
 *.blg
+texput.log
+test_*
+output/
+*/output/
 
-# Scratch scripts
-ass2/fix_tex.py
-ass2/optimize_report.py
-ass2/ass2
+# Course practicals (outside assignment deliverables)
 practicals/

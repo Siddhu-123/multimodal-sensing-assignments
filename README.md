@@ -28,8 +28,6 @@ For offline review and submission verification, the entire project (reports, ins
 │   ├── fer2013_analysis.ipynb                   # Executed PyTorch Jupyter notebook
 │   ├── metrics.csv                              # Summary classification metrics
 │   ├── results.json                             # Recorded epoch-wise training logs & test results
-│   ├── SUBMISSION_CHECKLIST.md                  # Verification checklist
-│   ├── SCOPING_DOCUMENT_REPLACEMENTS.md         # Document scoping
 │   └── figures/                                 # Generated evaluation figures
 │       ├── class_distribution.png               # Training/validation/test class distributions
 │       ├── sample_grid.png                      # Sample facial images per emotion class
@@ -42,7 +40,7 @@ For offline review and submission verification, the entire project (reports, ins
 └── ass2/                                        # Assignment 2: MHEALTH Multimodal Activity Recognition
     ├── README.md                                # Assignment 2 comprehensive overview & reproduction guide
     ├── Assignment 2.pdf                         # Official course instructions and grading rubric
-    ├── MHEALTH_Assignment_2_Report.pdf          # Final compiled submission PDF report (11 pages)
+    ├── MHEALTH_Assignment_2_Report.pdf          # Final compiled submission PDF report (9 pages)
     ├── MHEALTH_Assignment_2_Report.tex          # Two-column LaTeX technical report source
     ├── mhealth_references.bib                   # Bibliography file
     ├── mhealth_analysis.ipynb                   # Executed Jupyter notebook with all outputs & plots

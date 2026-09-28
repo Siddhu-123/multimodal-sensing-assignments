@@ -2,7 +2,7 @@
 
 ## Final Deliverable
 
-`ass2/output/pdf/MHEALTH_Assignment_2_Report.pdf` (and `ass2/MHEALTH_Assignment_2_Report.pdf`)
+`ass2/MHEALTH_Assignment_2_Report.pdf`
 
 The technical report complies with all assignment requirements:
 - Fully articulated across Tasks 1–4 with explicit connections between sections.

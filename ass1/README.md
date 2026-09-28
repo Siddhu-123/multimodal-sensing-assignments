@@ -2,7 +2,7 @@
 
 ## Submit this file
 
-`output/pdf/FER2013_Assignment_1_Report.pdf`
+`FER2013_Assignment_1_Report.pdf`
 
 The report is under the ten-page limit and has separate sections for Tasks 1-4. The executed notebook and recorded results are included in this folder.
 
@@ -17,7 +17,7 @@ Source: [Kaggle FER2013 repository](https://www.kaggle.com/datasets/deadskull7/f
 - `fer2013_analysis.ipynb` - executed PyTorch notebook.
 - `FER2013_Assignment_1_Report.tex` - LaTeX source.
 - `fer2013_references.bib` - references.
-- `output/pdf/FER2013_Assignment_1_Report.pdf` - submission PDF.
+- `FER2013_Assignment_1_Report.pdf` - submission PDF.
 - `figures/` - plots used by the notebook and report, including the class-wise mean-image EDA figure.
 - `metrics.csv` and `results.json` - recorded experiment results.
 - `requirements.txt` - Python dependencies.
