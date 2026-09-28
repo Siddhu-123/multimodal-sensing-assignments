@@ -356,9 +356,11 @@ Figure~\ref{fig:training_curves} confirms stable convergence:
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
-\caption{Normalized test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
+\caption{Normalized test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10; values are row-normalised \%), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
 \label{fig:confusion_matrices}
 \end{figure*}
+
+
 
 \subsection{Model Evaluation}
 Table~\ref{tab:overall_results} reports test performance across 1,035 windows from unseen Subjects 9 and 10. Both multimodal architectures outperform all unimodal baselines:
@@ -418,10 +420,19 @@ $L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & Violent g
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.18\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
+\includegraphics[width=0.98\textwidth,height=0.165\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
 \caption{Multi-class classification curves across all five models on unseen test subjects: (a) Macro-Average Receiver Operating Characteristic (ROC) curves; (b) Macro-Average Precision-Recall (PR) curves.}
 \label{fig:roc_pr}
 \end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth,height=0.145\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
+\caption{Embedded deployment trade-offs: (a) Macro-F1 vs Trainable Parameters; (b) Macro-F1 vs Single-Window Inference Latency (ms).}
+\label{fig:computational_tradeoffs}
+\end{figure*}
+
+
 
 \subsection{Per-Class Performance and Error Analysis}
 Table~\ref{tab:per_class_f1} provides a per-class F1 breakdown across all 12 classes for all five models.
@@ -437,9 +448,13 @@ Combined with Figure~\ref{fig:confusion_matrices}, these results show how fusion
 \subsection{ROC and Precision-Recall Dynamics}
 Figure~\ref{fig:roc_pr} shows macro-average ROC and Precision-Recall curves:
 \begin{itemize}
-    \item Early and Late Fusion achieve an Area Under the ROC Curve of $\text{AUC} = 0.999$ (Figure~\ref{fig:roc_pr}(a)), with true positive rates $>0.96$ at false positive rates below 0.01.
-    \item Under class imbalance ($L_{12}$ has fewer samples), Precision-Recall curves (Figure~\ref{fig:roc_pr}(b)) confirm fusion advantages: Late Fusion attains $\text{AUC-PR} = 0.984$ and Early Fusion attains $0.982$, outperforming Chest (0.906), Ankle (0.889), and Wrist (0.845).
+    \item Early Fusion achieves an Area Under the ROC Curve of $\text{AUC} = 0.999$ while Late Fusion reaches $\text{AUC} = 1.000$ (Figure~\ref{fig:roc_pr}(a)), with true positive rates $>0.96$ at false positive rates below 0.01.
+    \item Under class imbalance ($L_{12}$ has fewer samples), Precision-Recall curves (Figure~\ref{fig:roc_pr}(b)) confirm fusion advantages: Late Fusion attains $\text{AUC-PR} = 0.994$ and Early Fusion attains $0.982$, outperforming Chest (0.958), Ankle (0.915), and Wrist (0.887).
 \end{itemize}
+
+
+
+
 
 \subsection{Trade-offs: Early vs Late Fusion}
 The fusion paradigms present distinct engineering trade-offs:
@@ -448,18 +463,13 @@ The fusion paradigms present distinct engineering trade-offs:
     \item \textbf{Late Fusion:} Provides modularity and fault tolerance. Each unimodal network operates independently, allowing dynamic weight re-normalisation if a sensor disconnects. Late Fusion slightly exceeds Early Fusion on Macro-F1 (0.9568 vs 0.9537) by avoiding high-dimensional feature interference.
 \end{itemize}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth,height=0.18\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
-\caption{Embedded deployment trade-offs: (a) Macro-F1 vs Trainable Parameters; (b) Macro-F1 vs Single-Window Inference Latency (ms).}
-\label{fig:computational_tradeoffs}
-\end{figure}
+
 
 \subsection{Computational Implications for Edge Deployment}
 Deploying multimodal inference on resource-constrained microcontrollers (e.g., ARM Cortex-M4) introduces specific constraints:
 \begin{enumerate}
     \item \textbf{Memory Footprint:} Unimodal MLPs require 16,332 parameters ($\approx 65.3\,\text{KB}$ in float32). Early Fusion scales to 76,172 parameters ($\approx 304.7\,\text{KB}$), while Late Fusion combines three networks totaling 48,996 parameters ($\approx 196.0\,\text{KB}$) (Figure~\ref{fig:computational_tradeoffs}(a)), fitting within typical 512\,KB SRAM budgets.
-    \item \textbf{Inference Latency:} Benchmarking 1,000 single-window passes on CPU yields \textbf{0.031\,ms for Early Fusion} and \textbf{0.097\,ms for Late Fusion} (Figure~\ref{fig:computational_tradeoffs}(b)). Late Fusion is slower due to evaluating three models sequentially, but 0.097\,ms uses $<0.01\%$ of the 1,280\,ms window budget.
+    \item \textbf{Inference Latency:} Benchmarking 1,000 single-window passes on CPU yields \textbf{0.031\,ms for Early Fusion} and \textbf{0.095\,ms for Late Fusion} (Figure~\ref{fig:computational_tradeoffs}(b)). Late Fusion is slower due to evaluating three models sequentially, but 0.095\,ms uses $<0.01\%$ of the 1,280\,ms window budget.
     \item \textbf{Bandwidth and Energy:} Bluetooth LE radio transmission consumes $\approx 15$--$25\,\text{mW}$, whereas microcontroller computation requires $<2\,\text{mW}$~\cite{lara2013survey}. Transmitting raw 50\,Hz data requires $128 \times 3 \times 4 = 1,536\,\text{bytes}$ per window. Extracting 53 features locally reduces telemetry to $53 \times 4 = 212\,\text{bytes}$---\textbf{an 86.2\% bandwidth saving}.
     \item \textbf{Clock Synchronisation:} Early fusion requires sub-millisecond time alignment across nodes. Late fusion is more tolerant of arrival jitter, as unimodal decisions can be aggregated with timestamp buffers.
 \end{enumerate}
@@ -472,9 +482,9 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 
 \begin{table*}[t]
 \centering
-\footnotesize
-\renewcommand{\arraystretch}{0.96}
-\setlength{\tabcolsep}{4pt}
+\scriptsize
+\renewcommand{\arraystretch}{0.84}
+\setlength{\tabcolsep}{3.5pt}
 \caption{Ethical Risk Matrix and Regulatory Governance Controls for Wearable Multimodal Activity Recognition.}
 \label{tab:ethics_matrix}
 \begin{tabularx}{\textwidth}{p{2.6cm}p{3.2cm}p{4.2cm}Y}
@@ -493,6 +503,8 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 \bottomrule
 \end{tabularx}
 \end{table*}
+
+
 
 Deploying continuous wearable sensing in clinical environments presents key ethical, legal, and operational considerations (Table~\ref{tab:ethics_matrix}).
 
@@ -536,7 +548,7 @@ This report demonstrated an end-to-end multimodal pipeline on adapted MHEALTH. U
 \renewcommand{\thebibliography}[1]{%
   \oldbibliography{#1}%
   \scriptsize
-  \setlength{\itemsep}{-0.5pt}%
+  \setlength{\itemsep}{-2.5pt}%
   \setlength{\parskip}{0pt}%
 }
 

@@ -91,19 +91,19 @@ The objective is to explore, implement, and compare multimodal data fusion techn
 4. **Comprehensive Evaluation & Ethical Governance (Task 4, 25/25):**
    - **Late Fusion achieves top performance: 95.56% Accuracy, 0.9568 Macro-F1**, providing a **+7.20% to +13.15% absolute F1 gain** over unimodal baselines.
    - Per-class breakdown across all 12 activities for all 5 models proves that fusion completely eliminates unimodal failure modes (e.g., walking F1 surges from 0.676 to 1.000; waist bends F1 surges from 0.522 to 1.000).
-   - Multi-class ROC ($\text{AUC} = 0.999$) and Precision-Recall ($\text{AUC-PR} = 0.984$) curves verify superior classification margins.
-   - Edge hardware latency benchmarked at **0.031 ms (Early Fusion)** and **0.097 ms (Late Fusion)**. On-node feature extraction delivers an **86.2% wireless telemetry bandwidth reduction**.
+   - Multi-class ROC ($\text{AUC} = 1.000$) and Precision-Recall ($\text{AUC-PR} = 0.994$) curves verify superior classification margins.
+   - Edge hardware latency benchmarked at **0.031 ms (Early Fusion)** and **0.095 ms (Late Fusion)**. On-node feature extraction delivers an **86.2% wireless telemetry bandwidth reduction**.
    - Comprehensive ethical analysis covering GDPR Articles 4(14), 9, 22, HIPAA, APPs 3/6/11, demographic/elderly bias, and an actionable 5-point risk mitigation matrix.
 
 ### Assignment 2 Results Summary
 
 | Model | Test Accuracy | Macro-Precision | Macro-Recall | Macro-F1 | Weighted-F1 | Parameters | Inference Latency | Selected Epoch |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Chest Accel (Baseline A)** | 88.50% | 0.9298 | 0.8945 | 0.8848 | 0.8746 | 16,332 | 0.031 ms | 8 |
+| **Chest Accel (Baseline A)** | 88.50% | 0.9298 | 0.8945 | 0.8848 | 0.8746 | 16,332 | 0.030 ms | 8 |
 | **Ankle Accel (Baseline B)** | 85.89% | 0.8913 | 0.8649 | 0.8641 | 0.8588 | 16,332 | 0.030 ms | 19 |
-| **Wrist Gyro (Baseline C)** | 85.60% | 0.8836 | 0.8259 | 0.8253 | 0.8456 | 16,332 | 0.031 ms | 11 |
+| **Wrist Gyro (Baseline C)** | 85.60% | 0.8836 | 0.8259 | 0.8253 | 0.8456 | 16,332 | 0.030 ms | 11 |
 | **Early Fusion (Strategy 1)** | 95.27% | 0.9695 | 0.9565 | 0.9537 | 0.9497 | 76,172 | 0.031 ms | 18 |
-| **Late Fusion (Strategy 2)** | **95.56%** | **0.9721** | **0.9592** | **0.9568** | **0.9529** | 48,996 | 0.097 ms | — |
+| **Late Fusion (Strategy 2)** | **95.56%** | **0.9721** | **0.9592** | **0.9568** | **0.9529** | 48,996 | 0.095 ms | — |
 
 ---
 

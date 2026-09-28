@@ -192,26 +192,26 @@ def plot_task1_figures(raw_dfs):
     summary = all_sub.groupby(["activity", "subject"])[["chest_vm", "ankle_vm", "wrist_gyro_vm"]].mean().reset_index()
     summary["activity_name"] = summary["activity"].map(ACTIVITY_SHORT)
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(5.0, 4.4), sharex=True)
     
     order = [ACTIVITY_SHORT[i] for i in range(1, 13)]
     
     # Ankle Acceleration Vector Magnitude (m/s^2)
-    sns.boxplot(x="activity_name", y="ankle_vm", data=summary, order=order, ax=ax1, palette="Blues_d", width=0.6)
-    sns.stripplot(x="activity_name", y="ankle_vm", data=summary, order=order, ax=ax1, color="crimson", size=5, jitter=0.2)
-    ax1.set_title("(a) Ankle Acceleration Magnitude across Activities (10 Subjects)", fontsize=11, fontweight='bold')
-    ax1.set_ylabel("Mean Acceleration Magnitude ($m/s^2$)", fontsize=10)
-    ax1.set_xlabel("Activity", fontsize=10)
-    ax1.tick_params(axis='x', rotation=45)
+    sns.boxplot(x="activity_name", y="ankle_vm", data=summary, order=order, ax=ax1, palette="Blues_d", width=0.6, hue="activity_name", legend=False)
+    sns.stripplot(x="activity_name", y="ankle_vm", data=summary, order=order, ax=ax1, color="crimson", size=4, jitter=0.2)
+    ax1.set_title("(a) Ankle Acceleration Magnitude ($m/s^2$)", fontsize=11, fontweight='bold', pad=3)
+    ax1.set_ylabel("Mean Accel ($m/s^2$)", fontsize=9.5, fontweight='bold')
+    ax1.tick_params(axis='y', labelsize=8.5)
     ax1.grid(True, linestyle='--', alpha=0.5)
     
     # Wrist Gyroscope Angular Rate (deg/s)
-    sns.boxplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, palette="Oranges_d", width=0.6)
-    sns.stripplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, color="darkblue", size=5, jitter=0.2)
-    ax2.set_title("(b) Wrist Angular Velocity across Activities (10 Subjects)", fontsize=11, fontweight='bold')
-    ax2.set_ylabel("Mean Angular Rate ($deg/s$)", fontsize=10)
-    ax2.set_xlabel("Activity", fontsize=10)
-    ax2.tick_params(axis='x', rotation=45)
+    sns.boxplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, palette="Oranges_d", width=0.6, hue="activity_name", legend=False)
+    sns.stripplot(x="activity_name", y="wrist_gyro_vm", data=summary, order=order, ax=ax2, color="darkblue", size=4, jitter=0.2)
+    ax2.set_title("(b) Wrist Angular Velocity ($deg/s$)", fontsize=11, fontweight='bold', pad=3)
+    ax2.set_ylabel("Mean Rate ($deg/s$)", fontsize=9.5, fontweight='bold')
+    ax2.set_xlabel("Activity", fontsize=9.5, fontweight='bold')
+    ax2.tick_params(axis='x', rotation=45, labelsize=8.5)
+    ax2.tick_params(axis='y', labelsize=8.5)
     ax2.grid(True, linestyle='--', alpha=0.5)
     
     plt.tight_layout()
@@ -916,19 +916,20 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         for r_i in range(12):
             for c_i in range(12):
                 v = cm[r_i, c_i]
-                annot_matrix[r_i, c_i] = f"{v:.2f}" if v >= 0.01 else ""
+                pct = int(round(v * 100))
+                annot_matrix[r_i, c_i] = f"{pct}" if pct >= 1 else ""
 
         sns.heatmap(
             cm, annot=annot_matrix, fmt="", cmap="Blues", cbar=False,
             xticklabels=class_short_labels, yticklabels=class_short_labels,
-            annot_kws={"size": 7.0, "weight": "bold"}, ax=ax
+            annot_kws={"size": 7.5, "weight": "bold"}, ax=ax, square=True
         )
         acc = accuracy_score(y_test, preds)
         f1 = f1_score(y_test, preds, average="macro", zero_division=0)
         ax.set_title(f"{name} (Acc: {acc*100:.1f}%, F1: {f1:.3f})", fontsize=11.5, fontweight='bold', pad=5)
         ax.set_ylabel("True Activity", fontsize=10, fontweight='bold')
         ax.set_xlabel("Predicted Activity", fontsize=10, fontweight='bold')
-        ax.tick_params(axis='x', rotation=45, labelsize=8.5)
+        ax.tick_params(axis='x', rotation=90, labelsize=8.5)
         ax.tick_params(axis='y', rotation=0, labelsize=8.5)
         
     # Hide the 6th subplot
@@ -936,6 +937,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     # Add a summary legend / annotation in the empty space
     summary_text = (
         "Evaluation Insights:\n"
+        "• Values are row-normalised percentages (%)\n"
         "• Unimodal Chest confuses Sitting vs Standing\n"
         "  and Walking vs Climbing Stairs.\n"
         "• Unimodal Ankle confuses static trunk postures\n"
@@ -946,7 +948,7 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
         "  modality blind spots, achieving near-perfect\n"
         "  discrimination across all 12 activities."
     )
-    axes[1, 2].text(0.05, 0.45, summary_text, fontsize=11, va='center', ha='left',
+    axes[1, 2].text(0.05, 0.45, summary_text, fontsize=10.5, va='center', ha='left',
                     bbox=dict(boxstyle="round,pad=0.6", facecolor="#f0f4f8", edgecolor="#3470a3", lw=1.2))
     
     plt.tight_layout()
@@ -1024,66 +1026,72 @@ def plot_evaluation_figures(histories, all_models, y_test, metrics_summary):
     print("Saved fig7_roc_pr_curves")
 
     # -------------------------------------------------------------
-    # Figure 8: Computational Trade-off Analysis
+    # Figure 8: Computational Trade-off Analysis (Side-by-Side 1x2)
     # -------------------------------------------------------------
     df_metrics = pd.DataFrame(metrics_summary)
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(5.2, 5.8))
-    
-    # (a) Macro F1 vs Parameter Count
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 2.7))
+
+    short_names = {
+        "Chest Accel": "Chest",
+        "Ankle Accel": "Ankle",
+        "Wrist Gyro": "Wrist",
+        "Early Fusion": "Early Fus.",
+        "Late Fusion": "Late Fus."
+    }
     scatter_colors = [colors_dict[m] for m in df_metrics["model"]]
-    ax1.scatter(df_metrics["parameters"], df_metrics["macro_f1"], s=180, c=scatter_colors, edgecolors="black", linewidths=1.2, zorder=3)
+
+    # (a) Parameters vs F1
+    ax1.scatter(df_metrics["parameters"], df_metrics["macro_f1"], s=90, c=scatter_colors, edgecolors="black", linewidths=0.9, zorder=3)
     for _, row in df_metrics.iterrows():
-        m_name = row["model"]
-        p_cnt = int(row["parameters"])
-        f1_val = float(row["macro_f1"])
-        if m_name == "Late Fusion":
-            x_off, y_off = -120, 6
-        elif m_name == "Early Fusion":
-            x_off, y_off = -120, -18
-        elif m_name == "Chest Accel":
-            x_off, y_off = 10, 2
-        elif m_name == "Ankle Accel":
-            x_off, y_off = 10, -14
+        m = row["model"]
+        s = short_names[m]
+        p = int(row["parameters"])
+        f = float(row["macro_f1"])
+        if m == "Late Fusion":
+            ax1.annotate(f"{s} ({p//1000}k)", (p, f), xytext=(-8, 7), textcoords="offset points", ha="right", fontsize=8.0, fontweight="bold")
+        elif m == "Early Fusion":
+            ax1.annotate(f"{s} ({p//1000}k)", (p, f), xytext=(-8, -13), textcoords="offset points", ha="right", fontsize=8.0, fontweight="bold")
+        elif m == "Chest Accel":
+            ax1.annotate(f"{s} ({p//1000}k)", (p, f), xytext=(8, 2), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
+        elif m == "Ankle Accel":
+            ax1.annotate(f"{s} ({p//1000}k)", (p, f), xytext=(8, -10), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
         else:
-            x_off, y_off = 10, -4
-        ax1.annotate(f"{m_name}\n({p_cnt:,} params)",
-                     (p_cnt, f1_val),
-                     xytext=(x_off, y_off), textcoords="offset points", fontsize=9.5, fontweight="bold")
-    ax1.set_title("(a) Performance vs Parameter Complexity", fontsize=11.5, fontweight="bold", pad=6)
-    ax1.set_xlabel("Trainable Parameters", fontsize=10.5, fontweight="bold")
-    ax1.set_ylabel("Test Macro-F1 Score", fontsize=10.5, fontweight="bold")
+            ax1.annotate(f"{s} ({p//1000}k)", (p, f), xytext=(8, -3), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
+
+    ax1.set_title("(a) Macro-F1 vs Parameters", fontsize=9.5, fontweight="bold", pad=4)
+    ax1.set_xlabel("Trainable Parameters", fontsize=8.5, fontweight="bold")
+    ax1.set_ylabel("Test Macro-F1", fontsize=8.5, fontweight="bold")
     ax1.set_ylim(0.81, 0.985)
-    ax1.set_xlim(12000, 80000)
-    ax1.tick_params(axis="both", labelsize=10)
+    ax1.set_xlim(8000, 88000)
+    ax1.tick_params(axis="both", labelsize=8.0)
     ax1.grid(True, linestyle="--", alpha=0.5)
 
-    # (b) Latency vs Macro F1
-    ax2.scatter(df_metrics["latency_ms"], df_metrics["macro_f1"], s=180, c=scatter_colors, edgecolors="black", linewidths=1.2, zorder=3)
+    # (b) Latency vs F1
+    ax2.scatter(df_metrics["latency_ms"], df_metrics["macro_f1"], s=90, c=scatter_colors, edgecolors="black", linewidths=0.9, zorder=3)
     for _, row in df_metrics.iterrows():
-        m_name = row["model"]
-        f1_val = float(row["macro_f1"])
-        lat_val = float(row["latency_ms"])
-        if m_name == "Late Fusion":
-            x_off, y_off = -92, -6
-        elif m_name == "Early Fusion":
-            x_off, y_off = 10, -4
-        elif m_name == "Chest Accel":
-            x_off, y_off = 10, 2
-        elif m_name == "Ankle Accel":
-            x_off, y_off = 10, -14
+        m = row["model"]
+        s = short_names[m]
+        f = float(row["macro_f1"])
+        lat = float(row["latency_ms"])
+        if m == "Late Fusion":
+            ax2.annotate(f"{s} ({lat:.3f}ms)", (lat, f), xytext=(0, 7), textcoords="offset points", ha="center", fontsize=8.0, fontweight="bold")
+        elif m == "Early Fusion":
+            ax2.annotate(f"{s} ({lat:.3f}ms)", (lat, f), xytext=(8, 5), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
+        elif m == "Chest Accel":
+            ax2.annotate(f"{s} ({lat:.3f}ms)", (lat, f), xytext=(8, 2), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
+        elif m == "Ankle Accel":
+            ax2.annotate(f"{s} ({lat:.3f}ms)", (lat, f), xytext=(8, -10), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
         else:
-            x_off, y_off = 10, -4
-        ax2.annotate(f"{m_name}\n({lat_val:.3f} ms)",
-                     (lat_val, f1_val),
-                     xytext=(x_off, y_off), textcoords="offset points", fontsize=9.5, fontweight="bold")
-    ax2.set_title("(b) Performance vs Inference Latency (Single Window)", fontsize=11.5, fontweight="bold", pad=6)
-    ax2.set_xlabel("Inference Latency per Window (ms)", fontsize=10.5, fontweight="bold")
-    ax2.set_ylabel("Test Macro-F1 Score", fontsize=10.5, fontweight="bold")
-    ax2.set_ylim(0.81, 0.985)
-    ax2.set_xlim(0.025, 0.105)
-    ax2.tick_params(axis="both", labelsize=10)
+            ax2.annotate(f"{s} ({lat:.3f}ms)", (lat, f), xytext=(8, -3), textcoords="offset points", ha="left", fontsize=8.0, fontweight="bold")
+
+    ax2.set_title("(b) Macro-F1 vs Latency", fontsize=9.5, fontweight="bold", pad=4)
+    ax2.set_xlabel("Inference Latency per Window (ms)", fontsize=8.5, fontweight="bold")
+    ax2.set_ylabel("Test Macro-F1", fontsize=8.5, fontweight="bold")
+    ax2.set_ylim(0.81, 0.99)
+    ax2.set_xlim(0.024, 0.106)
+    ax2.tick_params(axis="both", labelsize=8.0)
     ax2.grid(True, linestyle="--", alpha=0.5)
-    
+
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, "fig8_computational_tradeoffs.pdf"), bbox_inches="tight")
     plt.savefig(os.path.join(FIG_DIR, "fig8_computational_tradeoffs.png"), dpi=300, bbox_inches="tight")

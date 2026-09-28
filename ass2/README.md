@@ -20,11 +20,11 @@ The technical report complies with all assignment requirements:
 
 | Model | Test Accuracy | Macro-Precision | Macro-Recall | Macro-F1 | Weighted-F1 | Parameters | Inference Latency | Selected Epoch |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Chest Accel (Baseline A)** | 0.8850 | 0.9298 | 0.8945 | 0.8848 | 0.8746 | 16,332 | 0.031 ms | 8 |
+| **Chest Accel (Baseline A)** | 0.8850 | 0.9298 | 0.8945 | 0.8848 | 0.8746 | 16,332 | 0.030 ms | 8 |
 | **Ankle Accel (Baseline B)** | 0.8589 | 0.8913 | 0.8649 | 0.8641 | 0.8588 | 16,332 | 0.030 ms | 19 |
-| **Wrist Gyro (Baseline C)** | 0.8560 | 0.8836 | 0.8259 | 0.8253 | 0.8456 | 16,332 | 0.031 ms | 11 |
+| **Wrist Gyro (Baseline C)** | 0.8560 | 0.8836 | 0.8259 | 0.8253 | 0.8456 | 16,332 | 0.030 ms | 11 |
 | **Early Fusion (Strategy 1)** | 0.9527 | 0.9695 | 0.9565 | 0.9537 | 0.9497 | 76,172 | 0.031 ms | 18 |
-| **Late Fusion (Strategy 2)** | **0.9556** | **0.9721** | **0.9592** | **0.9568** | **0.9529** | 48,996 | 0.097 ms | — |
+| **Late Fusion (Strategy 2)** | **0.9556** | **0.9721** | **0.9592** | **0.9568** | **0.9529** | 48,996 | 0.095 ms | — |
 
 ### High Distinction Criteria Addressed:
 1. **Insightful EDA (Task 1):** Beyond flat surface statistics, includes multi-axis dynamic waveforms across activity regimes (Fig 1), kinetic energy & SMA distributions revealing 4 physical tiers across 10 participants (Fig 2), and cross-sensor/cross-modality correlation heatmap demonstrating complementary sensor synergy (Fig 3).
