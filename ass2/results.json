@@ -8,7 +8,7 @@
       "macro_f1": 0.8848,
       "weighted_f1": 0.8746,
       "parameters": 16332,
-      "latency_ms": 0.031,
+      "latency_ms": 0.03,
       "selected_epoch": 8
     },
     {
@@ -52,7 +52,7 @@
       "macro_f1": 0.9568,
       "weighted_f1": 0.9529,
       "parameters": 48996,
-      "latency_ms": 0.096,
+      "latency_ms": 0.095,
       "selected_epoch": "-"
     }
   ],

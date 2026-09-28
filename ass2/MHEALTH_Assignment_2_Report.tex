@@ -165,7 +165,7 @@ The stripplot points in Figure~\ref{fig:energy_dist} highlight inter-subject var
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.88\columnwidth]{fig3_sensor_correlation_heatmap.pdf}
+\includegraphics[width=\columnwidth]{fig3_sensor_correlation_heatmap.pdf}
 \caption{Cross-sensor Pearson correlation matrix across 17 kinematic and physiological channels ($N=50,000$).}
 \label{fig:correlation}
 \end{figure}
@@ -194,7 +194,7 @@ This low redundancy indicates that combining orthogonal modalities expands decis
 \subsection{Quantification and Diagnosis of Missingness}
 In wearable sensor networks, packet loss occurs via RF attenuation, body shadowing, and transmission collisions. In \texttt{MHEALTHDATASET\_MISSING}, missing entries appear as IEEE \texttt{NaN} values.
 
-An audit reveals \textbf{615,648 missing values} across 343,195 time steps, yielding an overall missingness rate of \textbf{7.80\%} across the 23 sensor channels (Table~\ref{tab:missing_stats}). The activity label column contains zero missing values. Missingness varies across channels (Figure~\ref{fig:missing_preproc}(a)), from 1.13\% (Wrist Gyro-Y) to 14.67\% (Ankle Mag-Z), but remains uniform across participants (7.43\% to 7.52\%).
+An audit reveals \textbf{615,648 missing values} across 343,195 time steps, yielding an overall missingness rate of \textbf{7.80\%} across the 23 sensor channels (Table~\ref{tab:missing_stats}). The activity label column contains zero missing values. Missingness varies across channels (Figure~\ref{fig:missing_preproc}(a)), from 1.13\% (Wrist Gyro-Y) to 14.67\% (Ankle Mag-Z), but remains uniform across participants (7.75\% to 7.84\%).
 
 \subsubsection{Burst Length Analysis and Missingness Mechanism}
 To determine the missingness mechanism, we analyze consecutive missing sample runs (burst length $\ell = t_{\text{end}} - t_{\text{start}} + 1$). Figure~\ref{fig:missing_preproc}(b) shows that \textbf{92.4\% of bursts consist of a single sample} ($\Delta t = 20\,\text{ms}$). Bursts of $\ell = 2$ samples comprise 5.3\%, with a maximum burst length of $\ell_{\max} = 7$ samples ($140\,\text{ms}$) across the entire dataset. The mean burst length is $1.09 \pm 0.32$ samples.
@@ -298,8 +298,8 @@ All models are evaluated on this identical test split under uniform preprocessin
 
 \begin{table}[t]
 \centering
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
+\small
+\setlength{\tabcolsep}{3.0pt}
 \caption{Model architecture specifications and hyperparameter configurations across unimodal and multimodal implementations.}
 \label{tab:models}
 \begin{tabular}{@{}lcc@{}}
@@ -355,7 +355,7 @@ Figure~\ref{fig:training_curves} confirms stable convergence:
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{fig6_confusion_matrices.pdf}
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
 \caption{Normalized test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
 \label{fig:confusion_matrices}
 \end{figure*}
@@ -371,7 +371,7 @@ Table~\ref{tab:overall_results} reports test performance across 1,035 windows fr
 \begin{table}[t]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{2.2pt}
+\setlength{\tabcolsep}{1.9pt}
 \caption{Overall test set classification performance, parameter complexity, and single-window inference latency on unseen Subjects 9 and 10.}
 \label{tab:overall_results}
 \begin{tabular}{@{}lcccccc@{}}
@@ -380,9 +380,9 @@ Table~\ref{tab:overall_results} reports test performance across 1,035 windows fr
 \midrule
 Chest Acc & 0.8850 & 0.9298 & 0.8945 & 0.8848 & 16,332 & 0.030 \\
 Ankle Acc & 0.8589 & 0.8913 & 0.8649 & 0.8641 & 16,332 & 0.030 \\
-Wrist Gyr & 0.8560 & 0.8836 & 0.8259 & 0.8253 & 16,332 & 0.029 \\
-Early Fus. & 0.9527 & 0.9695 & 0.9565 & 0.9537 & 76,172 & 0.030 \\
-\textbf{Late Fus.} & \textbf{0.9556} & \textbf{0.9721} & \textbf{0.9592} & \textbf{0.9568} & 48,996 & 0.094 \\
+Wrist Gyr & 0.8560 & 0.8836 & 0.8259 & 0.8253 & 16,332 & 0.030 \\
+Early Fus. & 0.9527 & 0.9695 & 0.9565 & 0.9537 & 76,172 & 0.031 \\
+\textbf{Late Fus.} & \textbf{0.9556} & \textbf{0.9721} & \textbf{0.9592} & \textbf{0.9568} & \textbf{48,996} & \textbf{0.095} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -418,7 +418,7 @@ $L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & Violent g
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.20\textheight]{fig7_roc_pr_curves.pdf}
+\includegraphics[width=0.98\textwidth,height=0.18\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
 \caption{Multi-class classification curves across all five models on unseen test subjects: (a) Macro-Average Receiver Operating Characteristic (ROC) curves; (b) Macro-Average Precision-Recall (PR) curves.}
 \label{fig:roc_pr}
 \end{figure*}
@@ -450,7 +450,7 @@ The fusion paradigms present distinct engineering trade-offs:
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig8_computational_tradeoffs.pdf}
+\includegraphics[width=\columnwidth,height=0.18\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
 \caption{Embedded deployment trade-offs: (a) Macro-F1 vs Trainable Parameters; (b) Macro-F1 vs Single-Window Inference Latency (ms).}
 \label{fig:computational_tradeoffs}
 \end{figure}
@@ -472,23 +472,24 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 
 \begin{table*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{4.5pt}
+\footnotesize
+\renewcommand{\arraystretch}{0.96}
+\setlength{\tabcolsep}{4pt}
 \caption{Ethical Risk Matrix and Regulatory Governance Controls for Wearable Multimodal Activity Recognition.}
-\label{tab:ethics_matrix}\footnotesize
-\begin{tabularx}{\textwidth}{p{2.8cm}p{3.4cm}p{3.8cm}Y}
+\label{tab:ethics_matrix}
+\begin{tabularx}{\textwidth}{p{2.6cm}p{3.2cm}p{4.2cm}Y}
 \toprule
 \textbf{Risk Category} & \textbf{Regulatory Framework} & \textbf{Clinical / Social Hazard} & \textbf{Actionable Engineering Control} \\
 \midrule
-\textbf{Biometric \& Health Data Surveillance} & GDPR Art.~4(14) (Biometric), Art.~9 (Special Category); HIPAA \S164.514; Privacy Act APP~3 \& 6 & Continuous gait dynamics can uniquely fingerprint individuals without consent, exposing location, routine, and medical state. & \textbf{On-Device Edge Inference:} Raw kinematic streams never leave the local node; only encrypted high-level classifications are transmitted via BLE 5.3 with AES-128. \\
+\textbf{Biometric Privacy \& Surveillance} & GDPR Art.~4(14), Art.~9; HIPAA \S164.514; Privacy Act APP~3 \& 6 & Tri-axial gait dynamics uniquely fingerprint individuals, risking unauthorized tracking and habit exposure. & \textbf{Edge Computing:} Raw kinematic streams never leave local nodes; only encrypted classifications are transmitted via BLE 5.3 (AES-128). \\
 \midrule
-\textbf{Automated Medical Decision Harm} & GDPR Art.~22 (Right to Human Intervention); EU AI Act High-Risk Class IIa & False negatives in fall detection or cardiac exercise monitoring can lead to delayed emergency intervention or fatal clinical injury. & \textbf{Human-in-the-Loop Fallback:} Automated predictions serve as decision-support alerts with mandatory human clinician confirmation for diagnostic interventions. \\
+\textbf{Automated Decision Harm} & GDPR Art.~22; EU AI Act High-Risk Class IIa & False negatives in fall or cardiac monitoring can delay emergency intervention or cause clinical harm. & \textbf{Human-in-the-Loop Fallback:} Predictions act as decision support; high-stakes interventions require clinician verification. \\
 \midrule
-\textbf{Demographic \& Biomechanical Bias} & EU AI Act Art.~10 (Data Governance); Australian AI Ethics Principles & Models trained on young, healthy volunteers suffer accuracy drops on elderly or mobility-impaired cohorts (e.g., Parkinson's, stroke hemiplegia). & \textbf{Stratified Multi-Cohort Auditing:} Mandatory post-market bias audits across age ($>65$), BMI, and gait pathology groups; adaptive fine-tuning on diverse clinical cohorts. \\
+\textbf{Demographic \& Biomechanical Bias} & EU AI Act Art.~10; Australian AI Ethics Principles & Models trained on young, healthy subjects degrade on elderly or mobility-impaired cohorts (e.g., Parkinson's). & \textbf{Stratified Multi-Cohort Auditing:} Post-market bias audits across age ($>65$), BMI, and pathologies; adaptive cohort fine-tuning. \\
 \midrule
-\textbf{Sensor Dropout Hazard \& Graceful Degradation} & ISO 13485 (Medical Device Safety); FDA SaMD Guidance & Loss of Bluetooth connection to a primary limb sensor could cause abrupt classifier crash or unpredictable prediction hallucination. & \textbf{Adaptive Modular Fallback:} Late fusion architecture dynamically reweights active sensors upon packet timeout, maintaining graceful unimodal degradation. \\
+\textbf{Sensor Dropout \& Failure Hazard} & ISO 13485; FDA SaMD Guidance & Wireless limb sensor disconnection could cause classifier crashes or hallucinated predictions during critical care. & \textbf{Dynamic Modular Fallback:} Late fusion architecture dynamically reweights active sensors upon packet loss, ensuring graceful degradation. \\
 \midrule
-\textbf{Informed Consent \& Data Minimisation} & GDPR Art.~5(1)(c) (Data Minimisation); Privacy Act APP~11 (Security) & Excessive continuous multi-sensor tracking gathers extraneous private data beyond operational clinical necessity. & \textbf{Purpose-Bound Gating:} Dynamic duty-cycling activates high-power modalities (ECG, Gyro) only during detected ambiguous states, preserving battery and privacy. \\
+\textbf{Informed Consent \& Minimisation} & GDPR Art.~5(1)(c); Privacy Act APP~11 & Unbounded multi-sensor tracking collects extraneous private telemetry beyond clinical monitoring necessity. & \textbf{Purpose-Bound Gating:} Dynamic duty-cycling activates high-power sensors (ECG, Gyro) only when ambiguous motion is detected. \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -506,24 +507,22 @@ These data streams require structured governance:
 \end{enumerate}
 
 \subsection{Algorithmic Bias and Demographic Generalisation}
-The MHEALTH dataset was collected from 10 healthy young adult volunteers (aged 20--35). This demographic profile creates deployment risks:
-\begin{itemize}
-    \item \textbf{Age Biomechanics:} Older adults exhibit reduced stride length, slower cadence, and altered balance sway. Models trained on young cohorts risk classifying normal elderly gait as abnormal.
-    \item \textbf{Mobility Impairments:} Post-stroke hemiplegia or Parkinsonian gait generate asymmetric motions that depart from healthy volunteer patterns, increasing false alarms in monitoring systems.
+The MHEALTH dataset was collected from 10 healthy young adult volunteers (aged 20--35), creating key clinical generalisation risks:
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{Age Biomechanics:} Older adults exhibit reduced stride length, slower cadence, and altered balance sway; models trained on young cohorts risk misclassifying normal elderly gait as abnormal.
+    \item \textbf{Mobility Impairments:} Pathologies like post-stroke hemiplegia or Parkinsonian tremors alter movement dynamics, increasing false alarms without adaptive fine-tuning on clinical cohorts.
 \end{itemize}
-Production deployments require domain adaptation and demographic validation across age and mobility cohorts prior to clinical application.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LIMITATIONS AND FUTURE WORK
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Limitations and Future Improvements}
 \label{sec:limitations}
-
-Key technical limitations include:
-\begin{enumerate}
-    \item \textbf{Sitting vs Standing Resolution:} Confusion between Sitting ($L_2$) and Standing ($L_1$) remains the primary residual error (Table~\ref{tab:per_class_f1}). Adding a thigh-mounted sensor would directly capture femoral tilt ($90^\circ$ difference), resolving this ambiguity.
-    \item \textbf{Deep Temporal Architectures:} While engineered features support efficient edge inference, future work could evaluate end-to-end models such as DeepConvLSTM~\cite{ordonez2016deep} or Attention Transformers~\cite{radu2018multimodal} directly on interpolated raw streams.
-    \item \textbf{Dropout Stress-Testing:} Empirical testing under simulated packet loss (10\%--50\%) would further quantify the fault tolerance of the late-fusion ensemble.
+Key technical limitations and future research avenues include:
+\begin{enumerate}[leftmargin=*,nosep]
+    \item \textbf{Sitting vs Standing Resolution:} Confusion between Sitting ($L_2$) and Standing ($L_1$) remains the primary residual error (Table~\ref{tab:per_class_f1}). Adding a thigh-mounted IMU would directly capture femoral orientation ($90^\circ$ difference), resolving this ambiguity.
+    \item \textbf{Deep Temporal Architectures:} While engineered features enable ultra-lightweight edge inference, evaluating end-to-end models (e.g., DeepConvLSTM~\cite{ordonez2016deep} or Transformers~\cite{radu2018multimodal}) on raw interpolated streams warrants investigation.
+    \item \textbf{Dropout Stress-Testing:} Empirical testing under simulated packet loss (10\%--50\%) would further quantify the fault tolerance of the late-fusion ensemble under extreme BLE link degradation.
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -531,13 +530,13 @@ Key technical limitations include:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 \label{sec:conclusion}
-This report demonstrated an end-to-end multimodal pipeline on the adapted MHEALTH dataset. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, resolving unimodal ambiguities. Computational profiling showed an 86.2\% telemetry bandwidth saving via local feature extraction, supported by a governance framework aligned with international privacy standards.
+This report demonstrated an end-to-end multimodal pipeline on adapted MHEALTH. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, eliminating unimodal ambiguities. Edge profiling confirmed an 86.2\% telemetry bandwidth saving via local feature extraction, supported by a governance framework aligned with international privacy standards.
 
 \let\oldbibliography\thebibliography
 \renewcommand{\thebibliography}[1]{%
   \oldbibliography{#1}%
-  \footnotesize
-  \setlength{\itemsep}{1pt}%
+  \scriptsize
+  \setlength{\itemsep}{-0.5pt}%
   \setlength{\parskip}{0pt}%
 }
 
