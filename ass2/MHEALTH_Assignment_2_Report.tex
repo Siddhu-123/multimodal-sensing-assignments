@@ -58,7 +58,6 @@
 \author{
 Satya Siddhartha Balanagu\\
 Student ID: A1961325\\
-School of Computer Science, University of Adelaide
 }
 
 \date{28 September 2026}
@@ -186,7 +185,7 @@ This partial redundancy indicates that combining these modalities expands decisi
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.24\textheight]{fig4_missing_data_preprocessing.pdf}
+\includegraphics[width=0.98\textwidth]{fig4_missing_data_preprocessing.pdf}
 \caption{Missing data audit and preprocessing pipeline: (a) Percentage missingness per sensor channel (Channels 0--22); (b) Burst length frequency distribution, confirming 90.4\% single-sample drops (20\,ms); (c) Intra-segment linear interpolation on Chest Accel-Y during Walking ($L_4$), demonstrating accurate trajectory reconstruction without cross-activity boundary leakage.}
 \label{fig:missing_preproc}
 \end{figure*}
@@ -355,7 +354,7 @@ Figure~\ref{fig:training_curves} confirms stable convergence:
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth,height=0.325\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
+\includegraphics[width=\textwidth,height=0.328\textheight,keepaspectratio]{fig6_confusion_matrices.pdf}
 \caption{Normalised test-set confusion matrices across all five models ($N_{\text{test}} = 1,035$ windows across unseen Subjects 9 and 10; values are row-normalised \%), detailing how multimodal fusion resolves unimodal misclassifications across the 12 activity classes.}
 \label{fig:confusion_matrices}
 \end{figure*}
@@ -418,14 +417,14 @@ $L_{12}$: Jump front \& back & 1.000 & 1.000 & 0.545 & 1.000 & 1.000 & High grou
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth,height=0.130\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
+\includegraphics[width=0.98\textwidth,height=0.135\textheight,keepaspectratio]{fig7_roc_pr_curves.pdf}
 \caption{Multi-class classification curves across all five models on unseen test subjects: (a) Macro-Average Receiver Operating Characteristic (ROC) curves; (b) Macro-Average Precision-Recall (PR) curves.}
 \label{fig:roc_pr}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth,height=0.118\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
+\includegraphics[width=\textwidth,height=0.120\textheight,keepaspectratio]{fig8_computational_tradeoffs.pdf}
 \caption{Embedded deployment trade-offs: (a) Macro-F1 vs Trainable Parameters; (b) Macro-F1 vs Single-Window Inference Latency (ms).}
 \label{fig:computational_tradeoffs}
 \end{figure*}
@@ -468,52 +467,32 @@ Deploying multimodal inference on resource-constrained microcontrollers (e.g., A
 \section{Ethical Considerations and Governance}
 \label{sec:ethics}
 
-\begin{table*}[t]
-\centering
-\scriptsize
-\renewcommand{\arraystretch}{0.68}
-\setlength{\tabcolsep}{3.5pt}
-\caption{Ethical Risk Matrix and Regulatory Governance Controls for Wearable Multimodal Activity Recognition.}
-\label{tab:ethics_matrix}
-\begin{tabularx}{\textwidth}{p{2.6cm}p{3.2cm}p{4.2cm}Y}
-\toprule
-\textbf{Risk Category} & \textbf{Regulatory Framework} & \textbf{Clinical / Social Hazard} & \textbf{Actionable Engineering Control} \\
-\midrule
-\textbf{Biometric Privacy \& Surveillance} & GDPR Art.~4(14), Art.~9; HIPAA 45 CFR \S164.514; Privacy Act APP~3 \& APP~11 & Tri-axial gait dynamics uniquely fingerprint individuals, risking unauthorized tracking and habit exposure. & \textbf{Edge Extraction:} Transmitting 212-byte feature vectors or local classifications via BLE 5.3 with AES-128 encryption, avoiding raw signal transmission. \\
-\midrule
-\textbf{Automated Decision Harm} & EU MDR Class IIa; EU AI Act High-Risk Class IIa; GDPR Art.~22 & False negatives in fall or cardiac monitoring can delay emergency intervention or cause clinical harm. & \textbf{Human-in-the-Loop Fallback:} Predictions act as decision support; high-stakes interventions require clinician verification. \\
-\midrule
-\textbf{Demographic \& Biomechanical Bias} & EU AI Act Art.~10; Australian AI Ethics Principles & Models trained on young, healthy subjects degrade on elderly or mobility-impaired cohorts (e.g., Parkinson's). & \textbf{Stratified Multi-Cohort Auditing:} Post-market bias audits across age ($>65$), BMI, and pathologies; adaptive cohort fine-tuning. \\
-\midrule
-\textbf{Sensor Dropout \& Failure Hazard} & ISO 13485 (Medical QMS); FDA SaMD Guidance & Wireless limb sensor disconnection could cause classifier crashes or hallucinated predictions during critical care. & \textbf{Dynamic Modular Fallback:} Late fusion architecture dynamically reweights active sensors upon packet loss, enabling degraded operation. \\
-\midrule
-\textbf{Informed Consent \& Minimisation} & GDPR Art.~5(1)(c); Privacy Act APP~3 (Consent) \& APP~11 (Security) & Unbounded multi-sensor tracking collects extraneous private telemetry beyond clinical monitoring necessity. & \textbf{Purpose-Bound Gating:} Dynamic duty-cycling activates high-power sensors (ECG, Gyro) only when ambiguous motion is detected. \\
-\bottomrule
-\end{tabularx}
-\end{table*}
+Continuous multimodal sensing in mobile and clinical environments introduces ethical, regulatory, and patient-safety responsibilities across data lifecycle management, algorithmic governance, and hardware resilience.
 
-Deploying continuous wearable sensing in clinical environments presents ethical, legal, and operational considerations (Table~\ref{tab:ethics_matrix}).
-
-\subsection{Biometric Privacy Frameworks}
-Wearable motion data contains identifying signatures. Prior biomechanical research indicates that tri-axial gait acceleration can support user identification, while ECG traces expose cardiac conditions and autonomic state~\cite{bulling2014tutorial}.
-
-These data streams require structured governance:
+\subsection{Biometric Privacy and Regulatory Compliance}
+Wearable inertial and physiological data contain unique individual signatures. Tri-axial gait kinematics can support biometric re-identification, while continuous electrocardiogram traces capture cardiac pathologies, stress, and autonomic state~\cite{bulling2014tutorial}. These properties engage key international regulatory frameworks:
 \begin{enumerate}
-    \item \textbf{GDPR:} Under GDPR Article~4(14)~\cite{gdpr2016}, gait acceleration constitutes biometric data, while cardiac measurements fall under \textbf{Special Category Health Data (Article~9)}, requiring explicit consent (Article~6(1)(a) and 9(2)(a)). Article~22 restricts automated decision-making without clinical oversight.
-    \item \textbf{HIPAA:} In clinical settings, wearable telemetry constitutes Protected Health Information (PHI), requiring encryption under the HIPAA Security Rule (45 CFR Part 164)~\cite{hipaa1996}.
-    \item \textbf{Australian Privacy Principles (APPs):} Under the Privacy Act 1988, biometric and health data are classified as \textbf{Sensitive Information} (APP~3), requiring express consent and secure data lifecycle handling (APP~11)~\cite{oaic_app_2021}.
+    \item \textbf{General Data Protection Regulation (GDPR):} Under GDPR Article~4(14)~\cite{gdpr2016}, movement dynamics capable of identifying individuals constitute biometric data. Cardiac telemetry qualifies as Special Category Health Data (Article~9), requiring explicit patient consent (Articles~6(1)(a) and 9(2)(a)). Furthermore, Article~22 restricts fully autonomous decision-making in clinical interventions without medical oversight.
+    \item \textbf{Health Insurance Portability and Accountability Act (HIPAA):} In clinical deployments, streaming telemetry represents Protected Health Information (PHI) subject to the HIPAA Security Rule (45 CFR Part 164)~\cite{hipaa1996}, mandating transmission encryption and access audits.
+    \item \textbf{Australian Privacy Principles (APPs):} Under the Privacy Act 1988, biometric and physiological records constitute Sensitive Information (APP~3), necessitating express consent, purpose-bound collection, and lifecycle data disposal (APP~11)~\cite{oaic_app_2021}.
 \end{enumerate}
 
-\subsection{Algorithmic Bias and Demographic Generalisation}
-The MHEALTH dataset was collected from 10 healthy adult participants, creating clinical generalisation risks:
-\begin{itemize}[leftmargin=*,nosep]
-    \item \textbf{Age Biomechanics:} Older adults exhibit reduced stride length, slower cadence, and altered balance sway; models trained on young cohorts risk misclassifying normal elderly gait as abnormal.
-    \item \textbf{Mobility Impairments:} Pathologies like post-stroke hemiplegia or Parkinsonian tremors alter movement dynamics, increasing false alarms without adaptive fine-tuning on clinical cohorts.
+\subsection{Technical Controls and Patient Safety}
+To reconcile clinical utility with privacy preservation, engineering controls must address operational hazards:
+\begin{itemize}
+    \item \textbf{On-Device Feature Extraction:} Transmitting compact 212-byte feature representations or local classifications over encrypted BLE 5.3 links (AES-128) eliminates raw waveform transmission, directly satisfying data minimisation mandates (GDPR Article~5(1)(c)).
+    \item \textbf{Decision Support and Clinical Oversight:} In fall detection and continuous patient telemetry, false negative misclassifications risk delayed clinical intervention. Classifiers must operate as decision-support systems rather than fully autonomous triage agents (EU AI Act High-Risk Class IIa).
+    \item \textbf{Dynamic Fault Recovery:} Sensor detachment or packet loss during monitoring risks corrupting downstream inferences. The modularity of late fusion supports dynamic posterior re-weighting across surviving channels, enabling graceful degradation without system crashes.
+    \item \textbf{Purpose-Bound Duty Cycling:} Unbounded multi-channel recording increases user surveillance risks and battery drain. Dynamic activation can restrict high-rate inertial and ECG streaming to intervals where primary low-power sensors detect ambiguous motion.
 \end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% LIMITATIONS AND FUTURE WORK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Demographic Bias and Clinical Generalisation}
+The MHEALTH dataset was collected from 10 healthy adult participants, presenting clinical generalisation risks:
+\begin{itemize}
+    \item \textbf{Age-Related Biomechanics:} Older populations exhibit reduced stride length, slower cadence, and greater postural sway. Models trained exclusively on young adult kinematics risk misclassifying healthy elderly ambulation as pathological or unsteady.
+    \item \textbf{Mobility and Neurological Impairments:} Pathologies such as post-stroke hemiplegia or Parkinsonian tremor alter temporal symmetry and frequency profiles, necessitating stratified validation and fine-tuning on target clinical cohorts prior to deployment.
+\end{itemize}
+
 \section{Limitations and Future Improvements}
 \label{sec:limitations}
 Technical limitations and future research avenues include:
@@ -531,14 +510,7 @@ Technical limitations and future research avenues include:
 \label{sec:conclusion}
 This work presented an end-to-end multimodal classification pipeline on the MHEALTH benchmark. Using segment-bounded interpolation, we resolved 615,648 missing values without cross-activity leakage. Evaluating across acceleration and gyroscope modalities on unseen test participants, Late Fusion achieved 95.56\% accuracy and 0.9568 Macro-F1, outperforming unimodal baselines and eliminating major ambulatory confusions, though static sitting and standing remain challenging. Edge profiling confirmed an estimated 86.2\% telemetry payload reduction via local feature extraction, supported by a governance framework aligned with international privacy standards.
 
-\let\oldbibliography\thebibliography
-\renewcommand{\thebibliography}[1]{%
-  \oldbibliography{#1}%
-  \fontsize{6.5pt}{7.5pt}\selectfont
-  \setlength{\itemsep}{-3.5pt}%
-  \setlength{\parsep}{0pt}%
-  \setlength{\parskip}{0pt}%
-}
+
 
 \bibliographystyle{unsrt}
 \bibliography{mhealth_references}
